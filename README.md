@@ -64,7 +64,7 @@ parallel -a /data/USA/haplotypes/USA.sync \
  | gzip > ta/consensus/usa_min10_max005_mc10.consensus.gz
 ```
 
-### 3) Obtain and map data from Zambia
+### 3) Obtain and map data from te DGN dataset (see Lack, _et al._ [2012]())
 
 ```bash
 ## download raw data from SRA and map with same pipeline as above
