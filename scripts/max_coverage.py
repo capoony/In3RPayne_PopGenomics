@@ -1,9 +1,6 @@
 import math
 import collections
 from optparse import OptionParser, OptionGroup
-from rpy2.robjects import r
-import rpy2.robjects as robjects
-
 
 # Author: Martin Kapun
 
