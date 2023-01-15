@@ -75,7 +75,7 @@ do
     ${name} \
     ${SRA}
 done < /data/DGN_SRA.txt
-
+```
 
 
 
