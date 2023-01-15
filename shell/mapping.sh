@@ -206,7 +206,7 @@ rm $out/mapping/$name-dedup.bam
 ## e) generate target List of InDel positions
 
 mkdir $out/mapping/realign_list
-${x##*.}
+
 java -jar scripts/GenomeAnalysisTK-3.4-46/GenomeAnalysisTK.jar \
     -T RealignerTargetCreator \
     -R reference/Dmel_6.04_hologenome_v2.fasta \
