@@ -18,10 +18,6 @@ sh /Volumes/MartinResearch1/single_karyos/shells/download_florida_maine.sh
 
 sh /Volumes/MartinResearch1/single_karyos/shells/map_USA.sh
 
-## isolate haplotypes and combine datasets
-
-sh /Volumes/MartinResearch1/single_karyos/shells/haplotypes.sh
-
 ## process African samples
 
 sh /Volumes/MartinResearch1/Inv_sequencing/single_karyos/shells/mapAfrica.sh
@@ -34,9 +30,13 @@ sh /Volumes/MartinResearch1/Inv_sequencing/single_karyos/shells/mapAustralia.sh
 
 sh /Volumes/MartinResearch1/Inv_sequencing/pooled_karyos/shell/Australia.sh
 
-## merge pseudo-pooled datasets
+## Now also add Europe
 
-sh /Volumes/MartinResearch1/Inv_sequencing/shell/mergeData.sh
+sh /Volumes/MartinResearch1/Inv_sequencing/shell/Europe-Haplotypes.sh
+
+## isolate haplotypes and combine datasets
+
+sh /Volumes/MartinResearch1/Inv_sequencing/single_karyos/shells/haplotypes.sh
 
 ###### GENEALOGY
 
@@ -86,7 +86,7 @@ sh /Volumes/MartinResearch1/Inv_sequencing/shells/PopGenome.sh
 ## make Table with final candidate genes from differnt sources
 
 python3 /Volumes/MartinResearch1/Inv_sequencing/scripts/MakeGeneList.py \
---input /Volumes/MartinResearch1/Inv_sequencing/analyses/genelists2.txt \
---gtf /Volumes/MartinResearch1/Inv_sequencing/Transinv/RNASeq_new/reference/dmel-all-r6.17.gtf.gz \
---conv /Volumes/MartinResearch1/Inv_sequencing/analyses/candidates/Trans-Genomics/DROID/database/fbgn_annotation_ID_fb_2018_06.tsv.gz \
-> /Volumes/MartinResearch1/Inv_sequencing/analyses/genelists_table2.txt
+    --input /Volumes/MartinResearch1/Inv_sequencing/analyses/genelists2.txt \
+    --gtf /Volumes/MartinResearch1/Inv_sequencing/Transinv/RNASeq_new/reference/dmel-all-r6.17.gtf.gz \
+    --conv /Volumes/MartinResearch1/Inv_sequencing/analyses/candidates/Trans-Genomics/DROID/database/fbgn_annotation_ID_fb_2018_06.tsv.gz \
+    >/Volumes/MartinResearch1/Inv_sequencing/analyses/genelists_table2.txt
