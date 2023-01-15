@@ -1,8 +1,8 @@
-## Bioinformatic pipeline for population genomic inference of _In(3R)Payne_
+# Bioinformatic pipeline for population genomic inference of _In(3R)Payne_
 
 see Material and Methods in [Kapun _et al._ (2023)]() for more details
 
-### 1) Mapping sequencing data from USA
+### 1) Map sequencing data from USA
 
 For each of the newly sequenced library in the USA, test the quality with FASTQC, trim the raw reads with cutadapt, map the reads with bbmap, sort and deduplicate the BAM file with picard and realign around InDels with GATK
 
@@ -21,7 +21,7 @@ bbmap
 done 
 ```
 
-### 2) Obtain phased sequencing data 
+### 2) Generate phased data for samples from the USA
 
 Following the approach in [Kapun _et al._ (2014)]() bioninformatically obtain haploid genomes from hemiclones
 
@@ -63,3 +63,30 @@ parallel -a /data/USA/haplotypes/USA.sync \
  --output /data/consensus/usa_min10_max005_mc10 \
  | gzip > ta/consensus/usa_min10_max005_mc10.consensus.gz
 ```
+
+### 3) Obtain and map data from Zambia
+
+```bash
+## download raw data from SRA and map with same pipeline as above
+while IFS=',' read -r name SRA
+do 
+    sh /shell/obtain-n-map-africa.sh \
+    /data/Zambia/
+    ${name} \
+    ${SRA}
+done < /data/DGN_SRA.txt
+
+
+
+
+
+
+
+
+## References
+
+Kapun, M., Schalkwyk, H. van, McAllister, B., Flatt, T. & Schlötterer, C. 2014. Inference of chromosomal inversion dynamics from Pool-Seq data in natural and laboratory populations of Drosophila melanogaster. Molecular Ecology 23: 1813–1827.
+
+Kapun, M., Barrón, M.G., Staubach, F., Obbard, D.J., Wiberg, R.A.W., Vieira, J., et al. 2020. Genomic Analysis of European Drosophila melanogaster Populations Reveals Longitudinal Structure, Continent-Wide Selection, and Previously Unknown DNA Viruses. Mol Biol Evol 37: 2661–2678. Oxford Academic.
+
+Kofler, R., Pandey, R.V. & Schlotterer, C. 2011. PoPoolation2: identifying differentiation between populations using sequencing of pooled DNA samples (Pool-Seq). Bioinformatics 27: 3435–3436.
