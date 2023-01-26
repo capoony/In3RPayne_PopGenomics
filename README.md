@@ -2,7 +2,9 @@
 
 see Material and Methods in [Kapun _et al._ (2023)]() for more details
 
-### 1) Map and generate phased sequencing data from USA
+## 1) Map and Generae Phased Data
+
+### 1.1) USA
 
 For each of the newly sequenced library in the USA, test the quality with FASTQC, trim the raw reads with cutadapt, map the reads with bbmap, sort and deduplicate the BAM file with picard and realign around InDels with GATK
 
@@ -68,7 +70,7 @@ python2.7 /scripts/cons2vcf.py \
     --names Florida_S_1142,Florida_S_1145,Florida_S_1153,Florida_S_1155,Florida_S_1156,Florida_S_1157,Florida_S_1163,Florida_S_1164,Florida_S_1167,Florida_S_1218,Florida_S_1189,Florida_S_1170,Florida_S_1178,Florida_S_1203,Florida_S_1204,Florida_S_1158,Florida_S_1149,Florida_S_1174,Florida_S_1160,Florida_I_1153,Florida_I_1165,Florida_I_1169,Florida_I_1203,Florida_I_1218,Florida_I_1142,Florida_I_1146,Florida_I_1147,Florida_I_1149,Florida_I_1150,Florida_I_1178,Florida_I_1143,Florida_I_1156,Florida_I_1160,Florida_I_1161,Florida_I_1162,Florida_I_1164,Florida_I_1174,Florida_I_1152,Florida_I_1158,Maine_S_10-96,Maine_S_10-95,Maine_S_10-82,Maine_S_10-53,Maine_S_10-73,Maine_S_10-24,Maine_S_10-72,Maine_S_10-12,Maine_S_10-77,Maine_S_10-89,Maine_S_10-76,Maine_S_10-69,Maine_S_10-93,Maine_S_10-57,Maine_S_10-58,Maine_S_10-60,Maine_S_10-67,Maine_S_10-84,Maine_S_10-79,Maine_S_10-81
 ```
 
-### 3) Obtain and map data from the DGN dataset (see Lack, _et al._ [2016]())
+### 1.2) Zambia from DGN dataset (see Lack, _et al._ [2016]())
 
 ```bash
 ## download raw data from SRA and map with same pipeline as above
@@ -101,7 +103,7 @@ gunzip -c /data/Zambia/afr.mpileup.gz \
 
 ```
 
-### 4) Obtain and map data from Portugal (see Kapun, _et al._ [2014]() and Franssen, _et al._[2016]())
+### 1.3) Portugal (see Kapun, _et al._ [2014]() and Franssen, _et al._[2016]())
 
 ```bash
 
@@ -148,9 +150,48 @@ parallel -a /data/Portugal/Portugal.sync \
         --output /data/consensus/portugal_min10_max005_mc10 \
         | gzip > /data/consensus/portugal_min10_max005_mc10.consensus.gz
 
+```
+### 1.4) Australia 
+
+We downloaded the raw sequencing data of [Rane _et al._ 2015]() from SRA (accession: [PRJNA221876](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA221876/)) and then classified the karyotpyes as follows:
+
+```bash
+
+## loop through raw reads in folder /data and store BAM in /data/mapping
+for file in /data/Australia/*_R1.fq.gz
+do
+
+    tmp=${file##*/}
+    i=${tmp%%_*}
+
+    sh shell/mapping.sh \
+        /data/Australia/${i}_1.fq.gz	\
+        /data/Australia/${i}_2.fq.gz	\	
+        ${i} \
+        /data/Australia/mapping/${i} \
+        bbmap
+
+done 
+
+## synchronize as MPILEUP based on hologenome from Kapun et al. (2020) only including 3L and 3R
+samtools mpileup \
+    -B \
+    -f reference/Dmel_6.04_hologenome_v2.fasta \
+    -b /data/Australia_BAM.txt \
+    -l data /regions.bed.txt > /data/Australia/Australia.mpileup
+
+## use PoPoolation2 (Kofler et al. 2011) to covert MPILEUP to SYNC format
+java -jar /scripts/popoolation2_1201/mpileup2sync.jar \
+    --input /data/Australia/Australia.mpileup \
+    --threads 20 \
+    --output /data/Australia/Australia.sync
+
+```
+Then we used the dataset of In(3R)Payne-specific marker SNPs from [Kapun _et al._ 2014]() to test for the frequency of inversion-specific alleles in the individuals
 
 
 
+Then we further downloaded SNP data from from DataDryad [doi:10.5061/dryad.5q0m8.](https://datadryad.org/stash/dataset/doi:10.5061/dryad.5q0m8)
 
 ## References
 
