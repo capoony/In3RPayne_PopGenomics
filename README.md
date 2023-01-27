@@ -103,7 +103,7 @@ gunzip -c /data/Zambia/afr.mpileup.gz \
 
 ```
 
-### 1.3) Portugal (see Kapun, _et al._ [2014]() and Franssen, _et al._[2016]())
+### 1.3) Portugal (see Kapun, _et al._ [2014]() and Franssen, _et al._ [2016]())
 
 ```bash
 
@@ -193,15 +193,16 @@ Then we used the dataset of In(3R)Payne-specific marker SNPs `data/fixed095.txt`
 
 ## identify the average frequency of inversion-specific alleles in the individual libraries
 python2.7 /scripts/Australia-karyos.py \
-/data/fixed095.txt \
-/data/Australia/Australia.sync \
-IiR-1,IiR-2,IiR-3,IiR-4,IiR-5,IiR-6,IiR-7,IiR-8,IiR-9,IiR-10,IiR-11,IiR-12,IiR-13,IiR-14,IiR-15,IiR-16,IiR-17,IiR-18,IiR-19,IsR-1,IsR-2,IsR-3,IsR-4,IsR-5,IsR-6,IsR-7,IsR-8,IsR-9,IsR-10,IsR-11,IsR-12,IsR-13,IsR-14,IsR-15,IsR-16,IsR-17,IsR-18,YSR-1,YSR-2,YSR-3,YSR-4,YSR-5,YSR-6,YSR-7,YSR-8,YSR-9,YSR-10,YSR-11,YSR-12,YSR-13,YSR-14,YSR-15,YSR-16,YSR-17,YSR-18 \
-> /data/Australia/Australia_karyos.txt
+    --karyo /data/fixed095.txt \
+    --input /data/Australia/Australia.sync \
+    --names IiR-1,IiR-2,IiR-3,IiR-4,IiR-5,IiR-6,IiR-7,IiR-8,IiR-9,IiR-10,IiR-11,IiR-12,IiR-13,IiR-14,IiR-15,IiR-16,IiR-17,IiR-18,IiR-19,IsR-1,IsR-2,IsR-3,IsR-4,IsR-5,IsR-6,IsR-7,IsR-8,IsR-9,IsR-10,IsR-11,IsR-12,IsR-13,IsR-14,IsR-15,IsR-16,IsR-17,IsR-18,YSR-1,YSR-2,YSR-3,YSR-4,YSR-5,YSR-6,YSR-7,YSR-8,YSR-9,YSR-10,YSR-11,YSR-12,YSR-13,YSR-14,YSR-15,YSR-16,YSR-17,YSR-18 \
+    > /data/Australia/Australia_karyos.txt
 
 
 ```
+We only considered samples where the inversion-specific alleles at four SNPs showed an average frequency of >90% (considered "inverted") or <10% (considered "standard").
 
-Then we further downloaded SNP data from from DataDryad [doi:10.5061/dryad.5q0m8.](https://datadryad.org/stash/dataset/doi:10.5061/dryad.5q0m8)
+Then, we further downloaded the imputed SNP data from from DataDryad [doi:10.5061/dryad.5q0m8.](https://datadryad.org/stash/dataset/doi:10.5061/dryad.5q0m8) and used the karyotypic classification from above to calculate poppulation genetic statistics for each group separately.
 
 ## References
 

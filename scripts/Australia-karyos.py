@@ -1,5 +1,22 @@
 import sys
 from collections import defaultdict as d
+from optparse import OptionParser, OptionGroup
+
+# Author: Martin Kapun
+
+#########################################################   HELP   #########################################################################
+usage = "python %prog --input file --output file "
+parser = OptionParser(usage=usage)
+group = OptionGroup(parser, '< put description here >')
+
+#########################################################   CODE   #########################################################################
+
+parser.add_option("--karyo", dest="KA", help="Karyotype file")
+parser.add_option("--input", dest="IN", help="Input file")
+parser.add_option("--names", dest="NA", help="List of sample names")
+
+(options, args) = parser.parse_args()
+parser.add_option_group(group)
 
 
 def load_data(x):
@@ -25,14 +42,14 @@ def sync2string(x):
     return string
 
 
-names = sys.argv[3].split(",")
+names = options.NA.split(",")
 snph = d(lambda: d(int))
 kary = d(tuple)
-for l in load_data(sys.argv[1]):
+for l in load_data(options.KA):
     C, P, I, S = l.split()
     kary[C+"_"+P] = (S, I)
 
-for l in load_data(sys.argv[2]):
+for l in load_data(options.IN):
     C, P, R = l.split()[:3]
     Pops = l.split()[3:]
     if C+"_"+P not in kary:
