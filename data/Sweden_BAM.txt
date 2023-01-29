@@ -1,0 +1,14 @@
+/data/Sweden/mapping/SU02n/mapping/SU02n-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU05n/mapping/SU05n-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU07n/mapping/SU07n-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU08/mapping/SU08-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU21n/mapping/SU21n-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU25n/mapping/SU25n-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU26n/mapping/SU26n-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU29/mapping/SU29-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU37n/mapping/SU37n-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU58n/mapping/SU58n-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU75n/mapping/SU75n-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU81n/mapping/SU81n-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU93n/mapping/SU93n-dedup_rg_InDel.bam
+/data/Sweden/mapping/SU94/mapping/SU94-dedup_rg_InDel.bam

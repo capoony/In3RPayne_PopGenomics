@@ -2,7 +2,7 @@
 
 see Material and Methods in [Kapun _et al._ (2023)]() for more details
 
-## 1) Map and Generae Phased Data
+## 1) Map and generate phased sequencing data
 
 ### 1.1) USA
 
@@ -70,6 +70,39 @@ python2.7 /scripts/cons2vcf.py \
     --names Florida_S_1142,Florida_S_1145,Florida_S_1153,Florida_S_1155,Florida_S_1156,Florida_S_1157,Florida_S_1163,Florida_S_1164,Florida_S_1167,Florida_S_1218,Florida_S_1189,Florida_S_1170,Florida_S_1178,Florida_S_1203,Florida_S_1204,Florida_S_1158,Florida_S_1149,Florida_S_1174,Florida_S_1160,Florida_I_1153,Florida_I_1165,Florida_I_1169,Florida_I_1203,Florida_I_1218,Florida_I_1142,Florida_I_1146,Florida_I_1147,Florida_I_1149,Florida_I_1150,Florida_I_1178,Florida_I_1143,Florida_I_1156,Florida_I_1160,Florida_I_1161,Florida_I_1162,Florida_I_1164,Florida_I_1174,Florida_I_1152,Florida_I_1158,Maine_S_10-96,Maine_S_10-95,Maine_S_10-82,Maine_S_10-53,Maine_S_10-73,Maine_S_10-24,Maine_S_10-72,Maine_S_10-12,Maine_S_10-77,Maine_S_10-89,Maine_S_10-76,Maine_S_10-69,Maine_S_10-93,Maine_S_10-57,Maine_S_10-58,Maine_S_10-60,Maine_S_10-67,Maine_S_10-84,Maine_S_10-79,Maine_S_10-81
 ```
 
+### 1.2) Worldwide samples from DGN dataset (see Lack, _et al._ [2016]())
+
+```bash
+## download raw data from SRA and map with same pipeline as above
+while IFS=',' read -r name SRA
+do 
+    sh /shell/obtain-n-map-africa.sh \
+        /data/DGN/
+        ${name} \
+        ${SRA}
+done < /data/DGN_SRA.txt
+
+## now merge all strains to a big mpileup
+samtools mpileup \
+    -B \
+    -f /reference/Dmel_6.04_hologenome_v2.fasta \
+    -b /data/DGN_BAM.txt 
+    -l /data/regions.bed \
+    | gzip > /data/DGN/DGN.mpileup.gz
+
+## convert major allele to cons fileformat given that these libraries should be from haploid embryos (see Kapopoulou et al. 2020 for more details)
+gunzip -c /data/DGN/DGN.mpileup.gz \
+    | parallel \
+    --pipe  \
+    -k \
+    --cat python2.7 /scripts/mpileup2cons.py \
+        -c 10,200 \
+        -m {} \
+        -u 0.9 \
+        -b 20 | gzip > /data/consensus/DGN.consensus.gz
+
+```
+
 ### 1.2) Zambia from DGN dataset (see Lack, _et al._ [2016]())
 
 ```bash
@@ -88,10 +121,10 @@ samtools mpileup \
     -f /reference/Dmel_6.04_hologenome_v2.fasta \
     -b /data/Zambia_BAM.txt 
     -l /data/regions.bed \
-    | gzip > /data/Zambia/afr.mpileup.gz
+    | gzip > /data/Zambia/Zambia.mpileup.gz
 
 ## convert to cons fileformat given that these libraries should be from haploid embryos (see Kapopoulou et al. 2020 for more details)
-gunzip -c /data/Zambia/afr.mpileup.gz \
+gunzip -c /data/Zambia/Zambia.mpileup.gz \
     | parallel \
     --pipe  \
     -k \
@@ -99,7 +132,7 @@ gunzip -c /data/Zambia/afr.mpileup.gz \
         -c 10,200 \
         -m {} \
         -u 0.9 \
-        -b 20 | gzip > /data/consensus/afr.consensus.gz
+        -b 20 | gzip > /data/consensus/Zambia.consensus.gz
 
 ```
 
@@ -151,9 +184,73 @@ parallel -a /data/Portugal/Portugal.sync \
         | gzip > /data/consensus/portugal_min10_max005_mc10.consensus.gz
 
 ```
+
+### 1.4) Sweden (see Kapopoulou, _et al._ [2020]())
+
+Use [Aspera](https:/www.ibm.com/aspera/connect/) and [sratoolkit](https://www.ncbi.nlm.nih.gov/sra/docs/sradownload/) to download and convert raw data 
+
+```bash
+
+## get and map data 
+
+
+while IFS=$' \t\n'
+read -r A B C D E F SRA H name remainder
+do
+
+## used the ASPERA app to download from SRA 
+
+Aspera\ Connect.app/Contents/Resources/ascp \
+    -i Aspera\ Connect.app/Contents/Resources/asperaweb_id_dsa.openssh \
+    -T anonftp@ftp.ncbi.nlm.nih.gov:/sra/sra-instant/reads/ByRun/sra/SRR/${SRA:0:6}/$SRA/$SRA.sra \
+    /data/Sweden/
+
+## convert to FASTQ
+scripts/sratoolkit.2.9.2-mac64/bin/fastq-dump.2.5.2 \
+    --gzip \
+    --split-3 \
+    --outdir /data/Sweden/ \
+    -A $name \
+    /data/Sweden/$SRA.sra
+
+rm /data/Sweden/$SRA.sra
+
+mkdir -p /data/Sweden/$name
+
+## trim with cutadapt (min base quality >18, minium trimmed readlength 75bp) and map with bbmap (standard parameters) against D. mel v. 6.04
+sh shell/mapping.sh \
+    /data/Sweden/${name}_1.fastq.gz \
+    /data/Sweden/${name}_2.fastq.gz \
+    $name \
+    /data/Sweden/$name \
+    bbmap
+
+done < /data/Sweden/Sweden_SRA.txt
+
+## now merge all Portugese strains to a big mpileup
+samtools mpileup \
+    -B \
+    -f /reference/Dmel_6.04_hologenome_v2.fasta \
+    -b /data/Sweden_BAM.txt 
+    -l /data/regions.bed \
+    | gzip > /data/Sweden/Sweden.mpileup.gz
+
+## convert to cons fileformat given that these libraries should be from haploid embryos (see Kapopoulou et al. 2020 for more details)
+gunzip -c /data/Sweden/Sweden.mpileup.gz \
+    | parallel \
+    --pipe  \
+    -k \
+    --cat python2.7 /scripts/mpileup2cons.py \
+        -c 10,200 \
+        -m {} \
+        -u 0.9 \
+        -b 20 | gzip > /data/consensus/Sweden.consensus.gz
+
+```
+
 ### 1.4) Australia 
 
-We downloaded the raw sequencing data of [Rane _et al._ 2015]() from SRA (accession: [PRJNA221876](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA221876/)) and then classified the karyotpyes as follows:
+We downloaded the raw sequencing data of [Rane _et al._ 2015]() from SRA (accession: [PRJNA221876](https:/www.ncbi.nlm.nih.gov/bioproject/PRJNA221876/)) and then classified the karyotpyes as follows:
 
 ```bash
 
@@ -198,11 +295,40 @@ python2.7 /scripts/Australia-karyos.py \
     --names IiR-1,IiR-2,IiR-3,IiR-4,IiR-5,IiR-6,IiR-7,IiR-8,IiR-9,IiR-10,IiR-11,IiR-12,IiR-13,IiR-14,IiR-15,IiR-16,IiR-17,IiR-18,IiR-19,IsR-1,IsR-2,IsR-3,IsR-4,IsR-5,IsR-6,IsR-7,IsR-8,IsR-9,IsR-10,IsR-11,IsR-12,IsR-13,IsR-14,IsR-15,IsR-16,IsR-17,IsR-18,YSR-1,YSR-2,YSR-3,YSR-4,YSR-5,YSR-6,YSR-7,YSR-8,YSR-9,YSR-10,YSR-11,YSR-12,YSR-13,YSR-14,YSR-15,YSR-16,YSR-17,YSR-18 \
     > /data/Australia/Australia_karyos.txt
 
-
 ```
 We only considered samples where the inversion-specific alleles at four SNPs showed an average frequency of >90% (considered "inverted") or <10% (considered "standard").
 
-Then, we further downloaded the imputed SNP data from from DataDryad [doi:10.5061/dryad.5q0m8.](https://datadryad.org/stash/dataset/doi:10.5061/dryad.5q0m8) and used the karyotypic classification from above to calculate poppulation genetic statistics for each group separately.
+Then, we further downloaded the imputed SNP data from from DataDryad [doi:10.5061/dryad.5q0m8.](https:/datadryad.org/stash/dataset/doi:10.5061/dryad.5q0m8) and used the karyotypic classification from above to calculate poppulation genetic statistics for each group separately.
+
+## 2) Phylogenetic approach 
+
+Here, we investigated the phylogenetic signal of worldwide samples based on SNPs located within _In(3R)P_ or in distance to the inversion.
+
+### 2.1) Adjust Australian samples to match the other data
+
+At first, we lifted genomic coordinates of the data, originally mapped to the _D. melanogaster_ reference genome v. 5 to v.6 coordinates.
+
+```bash
+## convert coordinates
+python2.7 /scripts/Flybase_version_converter.py \
+--input /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3L_IiIsYs.vcf \
+--output /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3L_IiIsYs_v6.vcf
+
+python2.7 /scripts/Flybase_version_converter.py \
+--input /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3R_IiIsYs.vcf \
+--output /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3R_IiIsYs_v6.vcf
+
+
+## then convert from VCF to cons format
+python2.7 /scripts/vcf2cons.py \
+/data/Australia/3L-3R_Imputed_Merged_Variant_calls/3L_IiIsYs_v6.vcf.gz \
+| gzip > /data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz
+
+python2.7 /scripts/vcf2cons.py \
+/data/Australia/3L-3R_Imputed_Merged_Variant_calls/3R_IiIsYs_v6.vcf.gz \
+| gzip >> /data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz
+
+```
 
 ## References
 
