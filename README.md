@@ -311,27 +311,50 @@ At first, we lifted genomic coordinates of the data, originally mapped to the _D
 ```bash
 ## convert coordinates
 python2.7 /scripts/Flybase_version_converter.py \
---input /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3L_IiIsYs.vcf \
---output /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3L_IiIsYs_v6.vcf
+    --input /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3L_IiIsYs.vcf \
+    --output /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3L_IiIsYs_v6.vcf
 
 python2.7 /scripts/Flybase_version_converter.py \
---input /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3R_IiIsYs.vcf \
---output /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3R_IiIsYs_v6.vcf
+    --input /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3R_IiIsYs.vcf \
+    --output /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3R_IiIsYs_v6.vcf
 
 ## then convert from VCF to cons format
 python2.7 /scripts/vcf2cons.py \
-/data/Australia/3L-3R_Imputed_Merged_Variant_calls/3L_IiIsYs_v6.vcf.gz \
-| gzip > /data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz
+    /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3L_IiIsYs_v6.vcf.gz \
+    | gzip > /data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz
 
 python2.7 /scripts/vcf2cons.py \
-/data/Australia/3L-3R_Imputed_Merged_Variant_calls/3R_IiIsYs_v6.vcf.gz \
-| gzip >> /data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz
+    /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3R_IiIsYs_v6.vcf.gz \
+    | gzip >> /data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz
 
 ```
 
 ### 2.2) Merge all files in *.cons format
 
+Now, we merge the cons files and either draw randomly selected SNPs inside _In(3R)Payne_ or which are in distance to the Inversion boundaries
 
+```bash
+## Merge and select Inv SNPs
+python3 /scripts/merge_consensus.py \
+    --SNPs /data/Inv.bed \
+    --consensus /data/consensus/usa_min10_max005_mc10.consensus.gz,\
+        /data/consensus/DGN.consensus.gz,\
+        /data/consensus/portugal_min10_max005_mc10.consensus.gz,\
+        /data/consensus/Sweden.consensus.gz,\
+        /data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz \
+    | gzip > /data/consensus/Inv.cons.gz
+
+## Merge and select Non-Inv SNPs
+python3 /scripts/merge_consensus.py \
+    --SNPs /data/NoInv.bed \
+    --consensus /data/consensus/usa_min10_max005_mc10.consensus.gz,\
+        /data/consensus/DGN.consensus.gz,\
+        /data/consensus/portugal_min10_max005_mc10.consensus.gz,\
+        /data/consensus/Sweden.consensus.gz,\
+        /data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz \
+    | gzip > /data/consensus/NoInv.cons.gz
+
+```
 
 ## References
 
