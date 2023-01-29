@@ -134,6 +134,15 @@ gunzip -c /data/Zambia/Zambia.mpileup.gz \
         -u 0.9 \
         -b 20 | gzip > /data/consensus/Zambia.consensus.gz
 
+## convert consensus to VCF and retain site if > 50% of all samples with non-N's
+python2.7 /scripts/cons2vcf.py \
+    --input /data/consensus/Zambia.consensus.gz \
+    --output /data/consensus/Zambia \
+    --ind 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162 \
+    --N-cutoff 0.5 \
+    --names ZI81,ZI508,ZI505,ZI486,ZI448,ZI446,ZI405,ZI397N,ZI384,ZI362,ZI341,ZI319,ZI293,ZI292,ZI291,ZI264,ZI237,ZI233,ZI228,ZI226,ZI221,ZI220,ZI99,ZI91,ZI86,ZI85,ZI76,ZI68,ZI61,ZI530,ZI527,ZI524,ZI517,ZI514N,ZI50N,ZI504,ZI491,ZI490,ZI488,ZI477,ZI472,ZI471,ZI468,ZI467,ZI466,ZI460,ZI458,ZI457,ZI456,ZI455N,ZI453,ZI447,ZI445,ZI444,ZI433,ZI431,ZI421,ZI418N,ZI413,ZI402,ZI398,ZI395,ZI394N,ZI392,ZI386,ZI378,ZI377,ZI374,ZI373,ZI370,ZI365,ZI364,ZI359,ZI358,ZI357N,ZI348,ZI344,ZI342,ZI339,ZI336,ZI335,ZI332,ZI33,ZI329,ZI324,ZI321,ZI320,ZI31N,ZI316,ZI314,ZI313,ZI311N,ZI303,ZI295,ZI286,ZI281,ZI28,ZI279,ZI276,ZI271,ZI27,ZI269,ZI268,ZI265,ZI263,ZI261,ZI26,ZI255,ZI254N,ZI253,ZI252,ZI251N,ZI250,ZI240,ZI239,ZI235,ZI232,ZI231,ZI225,ZI219,ZI216N,ZI213,ZI212,ZI211,ZI210,ZI207,ZI206,ZI200,ZI198,ZI196,ZI194,ZI193,ZI191,ZI185,ZI184,ZI182,ZI181,ZI179,ZI178,ZI176,ZI173,ZI172,ZI170,ZI167,ZI165,ZI164,ZI161,ZI157,ZI152,ZI138,ZI136,ZI134N,ZI129,ZI126,ZI118N,ZI117,ZI114N,ZI104,ZI10,ZI56,ZI420,ZI388
+
+
 ```
 
 ### 1.3) Portugal (see Kapun, _et al._ [2014]() and Franssen, _et al._ [2016]())
@@ -254,9 +263,13 @@ gunzip -c /data/Sweden/Sweden.mpileup.gz \
         -u 0.9 \
         -b 20 | gzip > /data/consensus/Sweden.consensus.gz
 
-```
+## Now merge data from Portugal and Sweden
+python3 /scripts/merge_consensus.py \
+    --consensus /data/consensus/Zambia.consensus.gz,/data/consensus/DGN.consensus.gz,/data/consensus/usa_min10_max005_mc10.consensus.gz,/data/consensus/portugal_min10_max005_mc10.consensus.gz,/data/consensus/Sweden.consensus.gz,/data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz \
+    | gzip > /data/consensus/NoInv.cons.gz
 
-### 1.4) Australia 
+
+### 1.5) Australia 
 
 We downloaded the raw sequencing data of [Rane _et al._ 2015]() from SRA (accession: [PRJNA221876](https:/www.ncbi.nlm.nih.gov/bioproject/PRJNA221876/)) and then classified the karyotpyes as follows:
 
@@ -345,28 +358,17 @@ Now, we merge the cons files and either draw randomly selected SNPs inside _In(3
 ## Merge and select Inv SNPs
 python3 /scripts/merge_consensus.py \
     --SNPs /data/Inv.bed \
-    --consensus /data/consensus/Zambia.consensus.gz,\
-        /data/consensus/DGN.consensus.gz,\
-        /data/consensus/usa_min10_max005_mc10.consensus.gz,\
-        /data/consensus/portugal_min10_max005_mc10.consensus.gz,\
-        /data/consensus/Sweden.consensus.gz,\
-        /data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz \
+    --consensus /data/consensus/Zambia.consensus.gz,/data/consensus/DGN.consensus.gz,/data/consensus/usa_min10_max005_mc10.consensus.gz,/data/consensus/portugal_min10_max005_mc10.consensus.gz,/data/consensus/Sweden.consensus.gz,/data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz \
     | gzip > /data/consensus/Inv.cons.gz
 
 ## Merge and select Non-Inv SNPs
 python3 /scripts/merge_consensus.py \
     --SNPs /data/NoInv.bed \
-    --consensus  /data/consensus/Zambia.consensus.gz,\
-        /data/consensus/DGN.consensus.gz,\
-        /data/consensus/usa_min10_max005_mc10.consensus.gz,\
-        /data/consensus/portugal_min10_max005_mc10.consensus.gz,\
-        /data/consensus/Sweden.consensus.gz,\
-        /data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz \
+    --consensus /data/consensus/Zambia.consensus.gz,/data/consensus/DGN.consensus.gz,/data/consensus/usa_min10_max005_mc10.consensus.gz,/data/consensus/portugal_min10_max005_mc10.consensus.gz,/data/consensus/Sweden.consensus.gz,/data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz \
     | gzip > /data/consensus/NoInv.cons.gz
 
 ```
 
-### 2.3 ) Convert merged
 ```bash
 ## convert merged cons to nexus format
 python2.7 /scripts/cons2nexus.py \
@@ -381,6 +383,10 @@ python2.7 /scripts/cons2nexus.py \
     --names ZI81,ZI508,ZI505,ZI486,ZI448,ZI446,ZI405,ZI397N,ZI384,ZI362,ZI341,ZI319,ZI293,ZI292,ZI291,ZI264,ZI237,ZI233,ZI228,ZI226,ZI221,ZI220,ZI99,ZI91,ZI86,ZI85,ZI76,ZI68,ZI61,ZI530,ZI527,ZI524,ZI517,ZI514N,ZI50N,ZI504,ZI491,ZI490,ZI488,ZI477,ZI472,ZI471,ZI468,ZI467,ZI466,ZI460,ZI458,ZI457,ZI456,ZI455N,ZI453,ZI447,ZI445,ZI444,ZI433,ZI431,ZI421,ZI418N,ZI413,ZI402,ZI398,ZI395,ZI394N,ZI392,ZI386,ZI378,ZI377,ZI374,ZI373,ZI370,ZI365,ZI364,ZI359,ZI358,ZI357N,ZI348,ZI344,ZI342,ZI339,ZI336,ZI335,ZI332,ZI33,ZI329,ZI324,ZI321,ZI320,ZI31N,ZI316,ZI314,ZI313,ZI311N,ZI303,ZI295,ZI286,ZI281,ZI28,ZI279,ZI276,ZI271,ZI27,ZI269,ZI268,ZI265,ZI263,ZI261,ZI26,ZI255,ZI254N,ZI253,ZI252,ZI251N,ZI250,ZI240,ZI239,ZI235,ZI232,ZI231,ZI225,ZI219,ZI216N,ZI213,ZI212,ZI211,ZI210,ZI207,ZI206,ZI200,ZI198,ZI196,ZI194,ZI193,ZI191,ZI185,ZI184,ZI182,ZI181,ZI179,ZI178,ZI176,ZI173,ZI172,ZI170,ZI167,ZI165,ZI164,ZI161,ZI157,ZI152,ZI138,ZI136,ZI134N,ZI129,ZI126,ZI118N,ZI117,ZI114N,ZI104,ZI10,ZI56,ZI420,ZI388,FR180,FR217,FR229,FR361,CK1,CO10N,CO13N,CO14,CO15N,CO16,CO1,CO2,CO4N,CO8N,CO9N,EZ25,EZ2,EZ9N,GA125,GA129,GA132,GA141,GA145,GA160,GA185,GU10,GU6,GU7,GU9,KN133N,KN20N,KN35,KR39,KR42,KR4N,KR7,KT6,NG10N,NG1N,NG3N,NG9,SP221,TZ10,TZ14,TZ8,UM118,UM37,UM526,ZO65,ZS11,ZS37,ZS5,CK2,ED2,ED3,ED5N,ED6N,ED10N,EZ5N,GA130,GA191,GU2,KN6,KN34,KT1,NG6N,NG7,RC1,RC5,RG2,RG3,RG4N,RG5,RG6N,RG7,RG8,RG9,RG10,RG11N,RG13N,RG15,RG18N,RG19,RG21N,RG22,RG24,RG25,RG28,RG32N,RG33,RG34,RG35,RG36,RG37N,RG38N,RG39,SP80,SP173,SP188,SP235,SP241,SP254,UG5N,UG7,UG19,UG28N,ZI91a,ZI261a,ZI268,ZI468,ZL130,FR14,FR70,FR151,FR310,RAL-301,RAL-303,RAL-304,RAL-306,RAL-307,RAL-313,RAL-315,RAL-324,RAL-335,RAL-357,RAL-358,RAL-360,RAL-362,RAL-365,RAL-375,RAL-379,RAL-380,RAL-391,RAL-399,RAL-427,RAL-437,RAL-486,RAL-513,RAL-517,RAL-555,RAL-639,RAL-705,RAL-707,RAL-714,RAL-730,RAL-732,RAL-765,RAL-774,RAL-786,RAL-799,RAL-820,RAL-852,Florida_S_1142,Florida_S_1145,Florida_S_1153,Florida_S_1155,Florida_S_1156,Florida_S_1157,Florida_S_1163,Florida_S_1164,Florida_S_1167,Florida_S_1218,Florida_S_1189,Florida_S_1170,Florida_S_1178,Florida_S_1203,Florida_S_1204,Florida_S_1158,Florida_S_1149,Florida_S_1174,Florida_S_1160,Florida_I_1153,Florida_I_1165,Florida_I_1169,Florida_I_1203,Florida_I_1218,Florida_I_1142,Florida_I_1146,Florida_I_1147,Florida_I_1149,Florida_I_1150,Florida_I_1178,Florida_I_1143,Florida_I_1156,Florida_I_1160,Florida_I_1161,Florida_I_1162,Florida_I_1164,Florida_I_1174,Florida_I_1152,Florida_I_1158,Maine_S_10-96,Maine_S_10-95,Maine_S_10-82,Maine_S_10-53,Maine_S_10-73,Maine_S_10-24,Maine_S_10-72,Maine_S_10-12,Maine_S_10-77,Maine_S_10-89,Maine_S_10-76,Maine_S_10-69,Maine_S_10-93,Maine_S_10-57,Maine_S_10-58,Maine_S_10-60,Maine_S_10-67,Maine_S_10-84,Maine_S_10-79,Maine_S_10-81,F0-8-1,F0-11-1,F0-16-1,F0-21-1,F0-24-1,F0-25-1,hot-168-1,cold-21-0,cold-89-0,cold-91-0,F0-2-0,F0-3-0,F0-4-0,F0-5-0,F0-6-0,F0-7-0,F0-9-0,F0-10-0,F0-12-0,F0-13-0,F0-14-0,F0-15-0,F0-17-0,F0-18-0,F0-27-0,F0-29-0,168_hot_R2,150_hot_R2,143_hot_R2,136_hot_R1,129_hot_R1,117_hot_R1,106_hot_R1,100_cold_R1,96_cold_R1,91_cold_R1,89_cold_R2,80_cold_R2,53_cold_R2,52_cold_R2,21_cold_R3,SU02n,SU05n,SU07n,SU08,SU21n,SU25n,SU26n,SU29,SU37n,SU58n,SU75n,SU81n,SU93n,SU94,IiR-1,IiR-2,IiR-3,IiR-4,IiR-5,IiR-6,IiR-7,IiR-8,IiR-9,IiR-10,IiR-11,IiR-12,IiR-13,IiR-14,IiR-15,IiR-16,IiR-17,IiR-18,IiR-19,IsR-1,IsR-2,IsR-3,IsR-4,IsR-5,IsR-6,IsR-7,IsR-8,IsR-9,IsR-10,IsR-11,IsR-12,IsR-13,IsR-14,IsR-15,IsR-16,IsR-17,IsR-18,YSR-1,YSR-2,YSR-3,YSR-4,YSR-5,YSR-6,YSR-7,YSR-8,YSR-9,YSR-10,YSR-11,YSR-12,YSR-13,YSR-14,YSR-15,YSR-16,YSR-17,YSR-18 \
     > /data/consensus/NoInv.nexus
 ```
+
+Using the NEXUS files, we plotted phylogenetic networks based on the Neighbor-Net inference method with Splits-Tree.
+
+## 3) Analysis of 
 
 ## References
 

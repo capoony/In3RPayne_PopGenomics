@@ -31,15 +31,21 @@ def load_data(x):
     return y
 
 
-SL = d(lambda: d(str))
-for l in load_data(options.SL):
-    a = l.rstrip().split()
-    SL[a[0]][int(a[1])]
+print(options.SL)
+SL = 0
+if options.SL != None:
+    SL = d(lambda: d(str))
+    for l in load_data(options.SL):
+        a = l.rstrip().split()
+        SL[a[0]][int(a[1])]
 
 CL = d(lambda: d(list))
 for File in options.CL.split(","):
     for l in load_data(File):
         a = l.rstrip().split()
+        if SL == 0:
+            CL[a[0]][int(a[1])].append(a[-1])
+            continue
         if int(a[1]) in SL[a[0]]:
             CL[a[0]][int(a[1])].append(a[-1])
 
