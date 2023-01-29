@@ -318,7 +318,6 @@ python2.7 /scripts/Flybase_version_converter.py \
 --input /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3R_IiIsYs.vcf \
 --output /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3R_IiIsYs_v6.vcf
 
-
 ## then convert from VCF to cons format
 python2.7 /scripts/vcf2cons.py \
 /data/Australia/3L-3R_Imputed_Merged_Variant_calls/3L_IiIsYs_v6.vcf.gz \
@@ -329,6 +328,10 @@ python2.7 /scripts/vcf2cons.py \
 | gzip >> /data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz
 
 ```
+
+### 2.2) Merge all files in *.cons format
+
+
 
 ## References
 
