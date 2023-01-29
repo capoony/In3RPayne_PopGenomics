@@ -103,7 +103,7 @@ gunzip -c /data/DGN/DGN.mpileup.gz \
 
 ```
 
-### 1.2) Zambia from DGN dataset (see Lack, _et al._ [2016]())
+### 1.3) Zambia from DGN dataset (see Lack, _et al._ [2016]())
 
 ```bash
 ## download raw data from SRA and map with same pipeline as above
@@ -145,7 +145,7 @@ python2.7 /scripts/cons2vcf.py \
 
 ```
 
-### 1.3) Portugal (see Kapun, _et al._ [2014]() and Franssen, _et al._ [2016]())
+### 1.4) Portugal (see Kapun, _et al._ [2014]() and Franssen, _et al._ [2016]())
 
 ```bash
 
@@ -202,21 +202,18 @@ parallel -a /data/Portugal/Portugal.sync \
 
 ```
 
-### 1.4) Sweden (see Kapopoulou, _et al._ [2020]())
+### 1.5) Sweden (see Kapopoulou, _et al._ [2020]())
 
 Use [Aspera](https:/www.ibm.com/aspera/connect/) and [sratoolkit](https://www.ncbi.nlm.nih.gov/sra/docs/sradownload/) to download and convert raw data 
 
 ```bash
 
 ## get and map data 
-
-
 while IFS=$' \t\n'
 read -r A B C D E F SRA H name remainder
 do
 
 ## used the ASPERA app to download from SRA 
-
 Aspera\ Connect.app/Contents/Resources/ascp \
     -i Aspera\ Connect.app/Contents/Resources/asperaweb_id_dsa.openssh \
     -T anonftp@ftp.ncbi.nlm.nih.gov:/sra/sra-instant/reads/ByRun/sra/SRR/${SRA:0:6}/$SRA/$SRA.sra \
@@ -265,9 +262,9 @@ gunzip -c /data/Sweden/Sweden.mpileup.gz \
 
 ## Now merge data from Portugal and Sweden
 python3 /scripts/merge_consensus.py \
-    --consensus /data/consensus/Zambia.consensus.gz,/data/consensus/DGN.consensus.gz,/data/consensus/usa_min10_max005_mc10.consensus.gz,/data/consensus/portugal_min10_max005_mc10.consensus.gz,/data/consensus/Sweden.consensus.gz,/data/Australia/3L-3R_Imputed_Merged_Variant_calls/IiIsYs_v6.cons.gz \
-    | gzip > /data/consensus/NoInv.cons.gz
-
+    --consensus /data/consensus/portugal_min10_max005_mc10.consensus.gz,/data/consensus/Sweden.consensus.gz \
+    | gzip > /data/consensus/Europe.cons.gz
+```
 
 ### 1.5) Australia 
 
