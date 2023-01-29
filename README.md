@@ -266,7 +266,7 @@ python3 /scripts/merge_consensus.py \
     | gzip > /data/consensus/Europe.cons.gz
 ```
 
-### 1.5) Australia 
+### 1.6) Australia 
 
 We downloaded the raw sequencing data of [Rane _et al._ 2015]() from SRA (accession: [PRJNA221876](https:/www.ncbi.nlm.nih.gov/bioproject/PRJNA221876/)) and then classified the karyotpyes as follows:
 
