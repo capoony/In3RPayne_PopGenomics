@@ -40,9 +40,9 @@ print "Name\tOrigin\tComparison\tlocation\tC\tP\tfst"
 
 
 Contcode = {"PI-PS": "Europe", "PS-SS": "Europe", "PI-SS": "Europe", "FI-FS": "NorthAmerica",
-            "FI-MS": "NorthAmerica", "FS-MS": "NorthAmerica", "IS-YS": "Australia", "II-YS": "Australia", "II-IS": "Australia"}
+            "FI-MS": "NorthAmerica", "FS-MS": "NorthAmerica", "IS-YS": "Australia", "II-YS": "Australia", "II-IS": "Australia", "ZI-ZS": "Africa"}
 Compcode = {"PI-PS": "Karyotype", "PS-SS": "Geography", "PI-SS": "Karyotype+Geography", "FI-FS": "Karyotype",
-            "FI-MS": "Karyotype+Geography", "FS-MS": "Geography", "IS-YS": "Geography", "II-YS": "Karyotype+Geography", "II-IS": "Karyotype"}
+            "FI-MS": "Karyotype+Geography", "FS-MS": "Geography", "IS-YS": "Geography", "II-YS": "Karyotype+Geography", "II-IS": "Karyotype", "ZI-ZS": "Karyotype"}
 
 for S, v1 in sorted(posh.items()):
     for C, v2 in sorted(v1.items()):

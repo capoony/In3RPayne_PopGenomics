@@ -626,6 +626,7 @@ python2.7 /scripts/merge-diff.py \
     --names ZI-ZS,PI-PS,PI-SS,PS-SS,FI-FS,FI-MS,FS-MS,II-IS,II-YS,IS-YS \
  > /data/PopGen/AllData.fst
 
+## plot average FSTs per karyotype and geography, test for significant differences, and investigate if windowed FST within the inverted regions is correlated among geographic regions 
 Rscript /scripts/statNcompareFST.R /data/PopGen/AllData.fst
 
 ```

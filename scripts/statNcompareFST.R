@@ -16,7 +16,8 @@ D <- read.table(O, header = T)
 r2z <- function(x) {
   ifelse(x < 0, 0.0, x)
 }
-
+## remove Africa
+D <- subset(D, D$Origin != "Africa")
 ## remove sites which are not found in all datasets
 D <- data.frame(D, "CP" = paste(D$C, D$P, sep = ""))
 Dpos <- ddply(D, c("CP", "location"), summarise,
