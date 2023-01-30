@@ -64,7 +64,7 @@ parallel -a /data/USA/USA.sync \
  ## convert consensus to VCF and retain site if > 50% of all samples with non-N's
 python2.7 /scripts/cons2vcf.py \
     --input /data/consensus/usa_min10_max005_mc10.consensus.gz \
-    --output /data/consensus/USA \
+    --output /data/consensus/America \
     --ind 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58 \
     --N-cutoff 0.5 \
     --names Florida_S_1142,Florida_S_1145,Florida_S_1153,Florida_S_1155,Florida_S_1156,Florida_S_1157,Florida_S_1163,Florida_S_1164,Florida_S_1167,Florida_S_1218,Florida_S_1189,Florida_S_1170,Florida_S_1178,Florida_S_1203,Florida_S_1204,Florida_S_1158,Florida_S_1149,Florida_S_1174,Florida_S_1160,Florida_I_1153,Florida_I_1165,Florida_I_1169,Florida_I_1203,Florida_I_1218,Florida_I_1142,Florida_I_1146,Florida_I_1147,Florida_I_1149,Florida_I_1150,Florida_I_1178,Florida_I_1143,Florida_I_1156,Florida_I_1160,Florida_I_1161,Florida_I_1162,Florida_I_1164,Florida_I_1174,Florida_I_1152,Florida_I_1158,Maine_S_10-96,Maine_S_10-95,Maine_S_10-82,Maine_S_10-53,Maine_S_10-73,Maine_S_10-24,Maine_S_10-72,Maine_S_10-12,Maine_S_10-77,Maine_S_10-89,Maine_S_10-76,Maine_S_10-69,Maine_S_10-93,Maine_S_10-57,Maine_S_10-58,Maine_S_10-60,Maine_S_10-67,Maine_S_10-84,Maine_S_10-79,Maine_S_10-81
@@ -137,7 +137,7 @@ gunzip -c /data/Zambia/Zambia.mpileup.gz \
 ## convert consensus to VCF and retain site if > 50% of all samples with non-N's
 python2.7 /scripts/cons2vcf.py \
     --input /data/consensus/Zambia.consensus.gz \
-    --output /data/consensus/Zambia \
+    --output /data/consensus/Africa \
     --ind 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162 \
     --N-cutoff 0.5 \
     --names ZI81,ZI508,ZI505,ZI486,ZI448,ZI446,ZI405,ZI397N,ZI384,ZI362,ZI341,ZI319,ZI293,ZI292,ZI291,ZI264,ZI237,ZI233,ZI228,ZI226,ZI221,ZI220,ZI99,ZI91,ZI86,ZI85,ZI76,ZI68,ZI61,ZI530,ZI527,ZI524,ZI517,ZI514N,ZI50N,ZI504,ZI491,ZI490,ZI488,ZI477,ZI472,ZI471,ZI468,ZI467,ZI466,ZI460,ZI458,ZI457,ZI456,ZI455N,ZI453,ZI447,ZI445,ZI444,ZI433,ZI431,ZI421,ZI418N,ZI413,ZI402,ZI398,ZI395,ZI394N,ZI392,ZI386,ZI378,ZI377,ZI374,ZI373,ZI370,ZI365,ZI364,ZI359,ZI358,ZI357N,ZI348,ZI344,ZI342,ZI339,ZI336,ZI335,ZI332,ZI33,ZI329,ZI324,ZI321,ZI320,ZI31N,ZI316,ZI314,ZI313,ZI311N,ZI303,ZI295,ZI286,ZI281,ZI28,ZI279,ZI276,ZI271,ZI27,ZI269,ZI268,ZI265,ZI263,ZI261,ZI26,ZI255,ZI254N,ZI253,ZI252,ZI251N,ZI250,ZI240,ZI239,ZI235,ZI232,ZI231,ZI225,ZI219,ZI216N,ZI213,ZI212,ZI211,ZI210,ZI207,ZI206,ZI200,ZI198,ZI196,ZI194,ZI193,ZI191,ZI185,ZI184,ZI182,ZI181,ZI179,ZI178,ZI176,ZI173,ZI172,ZI170,ZI167,ZI165,ZI164,ZI161,ZI157,ZI152,ZI138,ZI136,ZI134N,ZI129,ZI126,ZI118N,ZI117,ZI114N,ZI104,ZI10,ZI56,ZI420,ZI388
@@ -403,36 +403,35 @@ Using VCFtools we first calculated nucleotide diveristy (π) and Tajima's _D_ as
 mkdir /data/PopGen
 
 ## loop through continents/countries
-for country in Australia Zambia Europe USA 
+for continent in Africa Europe America Australia
 do
 
     ## loop through karyotypes
-    for karyotype in Inv Std
+    for karyotype in Inv Std All
     do
 
         ## loop through regions
-        for file in data/${country}_*_${karyotype}.samples
+        for file in data/${continent}_*_${karyotype}.samples
         do
             
             ## isolate region name
             IFS='_ ' read -r -A array <<< "$file"
-            location=${array[2]}
+            region=${array[2]}
 
             ## calculate π
             /scripts/vcftools_0.1.13/bin/vcftools \
-                --keep data/${country}_${location}_${karyotype}.samples \
+                --keep data/${continent}_${region}_${karyotype}.samples \
                 --window-pi 100000 \
                 --window-pi-step 100000 \
-                --gzvcf /data/consensus/${country}.vcf.gz \
-                --out /data/PopGen/${country}_${location}_${karyotype}_100k
+                --gzvcf /data/consensus/${continent}.vcf.gz \
+                --out /data/PopGen/${continent}_${region}_${karyotype}_100k
 
             ## calculate Tajima's D
             /scripts/vcftools_0.1.13/bin/vcftools \
-                --keep data/${country}_${location}_${karyotype}.samples \
+                --keep data/${continent}_${region}_${karyotype}.samples \
                 --TajimaD 100000 \
-                --gzvcf /data/consensus/${country}.vcf.gz \
-                --out /data/PopGen/${country}_${location}_${karyotype}_100k
-
+                --gzvcf /data/consensus/${continent}.vcf.gz \
+                --out /data/PopGen/${continent}_${region}_${karyotype}_100k
         
         done
     
