@@ -405,15 +405,12 @@ mkdir /data/PopGen
 ## loop through continents/countries
 for continent in Africa Europe America Australia
 do
-
     ## loop through karyotypes
     for karyotype in Inv Std All
     do
-
         ## loop through regions
         for file in data/${continent}_*_${karyotype}.samples
-        do
-            
+        do      
             ## isolate region name
             IFS='_ ' read -r -A array <<< "$file"
             region=${array[2]}
@@ -424,7 +421,7 @@ do
                 --window-pi 100000 \
                 --window-pi-step 100000 \
                 --gzvcf /data/consensus/${continent}.vcf.gz \
-                --out /data/PopGen/${continent}_${region}_${karyotype}_100k
+                --out /data/PopGen/${continent}_${region}_${karyotype}_100k.pi
 
             ## calculate Tajima's D
             /scripts/vcftools_0.1.13/bin/vcftools \
@@ -434,12 +431,88 @@ do
                 --out /data/PopGen/${continent}_${region}_${karyotype}_100k
         
         done
-    
     done
 
-done
-```
+## then merge the results in a single large file for π and Tajima's D and also include estimates of recombination by Comeron 
+python /scripts/merge-div.py \
+    --input /data/PopGen/Africa_Zambia_Inv_100k.pi,/data/PopGen/Africa_Zambia_Std_100k.pi,/data/PopGen/Africa_Zambia_All_100k.pi,/data/PopGen/Europe_Portugal_Inv_100k.pi,/data/PopGen/Europe_Portugal_Std_100k.pi,/data/PopGen/Europe_Portugal_All_100k.pi,/data/PopGen/Europe_Sweden_Std_100k.pi,/data/PopGen/America_Florida_Inv_100k.pi,/data/PopGen/America_Florida_Std_100k.pi,/data/PopGen/America_Florida_All_100k.pi,/data/PopGen/America_Maine_Std_100k.pi,/data/PopGen/Australia_Queensland_Inv_100k.pi,/data/PopGen/Australia_Queensland_Std_100k.pi,/data/PopGen/Australia_Queensland_All_100k.pi,/data/PopGen/Australia_Victoria_Std_100k.pi \
+    --names Zambia-Inv,Zambia-Std,Zambia-All,Portugal-Inv,Portugal-Std,Portugal-All,Sweden-Std,Florida-Inv,Florida-Std,Florida-All,Maine-Std,Queensland-Inv,Queensland-Std,Queensland-All,Victoria-Std \
+    > /data/PopGen/AllData.pi
 
+python /scripts/merge-div.py \
+    --input /data/PopGen/Africa_Zambia_Inv_100k.Tajima.D,/data/PopGen/Africa_Zambia_Std_100k.Tajima.D,/data/PopGen/Africa_Zambia_All_100k.Tajima.D,/data/PopGen/Europe_Portugal_Inv_100k.Tajima.D,/data/PopGen/Europe_Portugal_Std_100k.Tajima.D,/data/PopGen/Europe_Portugal_All_100k.Tajima.D,/data/PopGen/Europe_Sweden_Std_100k.Tajima.D,/data/PopGen/America_Florida_Inv_100k.Tajima.D,/data/PopGen/America_Florida_Std_100k.Tajima.D,/data/PopGen/America_Florida_All_100k.Tajima.D,/data/PopGen/America_Maine_Std_100k.Tajima.D,/data/PopGen/Australia_Queensland_Inv_100k.Tajima.D,/data/PopGen/Australia_Queensland_Std_100k.Tajima.D,/data/PopGen/Australia_Queensland_All_100k.Tajima.D,/data/PopGen/Australia_Victoria_Std_100k.Tajima.D \
+    --names Zambia-Inv,Zambia-Std,Zambia-All,Portugal-Inv,Portugal-Std,Portugal-All,Sweden-Std,Florida-Inv,Florida-Std,Florida-All,Maine-Std,Queensland-Inv,Queensland-Std,Queensland-All,Victoria-Std \
+    > /data/PopGen/AllData.Tajima.D
+
+
+```
+I then plotted the values as lineplots in R
+
+```R
+### plot π for Inverted and Standard Chromosomes
+library(tidyverse)
+
+DATA=read.table("/data/PopGen/AllData.pi",header=T)
+
+DATA.3R=subset(DATA,DATA$C=="3R")
+DATA.3R=subset(DATA,DATA$InvStatus!="All")
+DATA.3R=subset(DATA.3R,DATA.3R$Origin %in% c("Florida","Portugal","Zambia","Queensland"))
+DATA.3R$Origin <- factor(DATA.3R$Origin,levels=c("Zambia","Portugal","Florida","Queensland"))
+
+P=ggplot(DATA.3R,aes(
+    x=P,
+    y=pi,
+    col=InvStatus))+
+  geom_line(lwd=1.5)+
+  geom_rect(mapping = aes(
+        xmin=16432209,
+        xmax=24744010,
+        ymin=0,
+        ymax=(max(pi))),
+    color="black",
+    alpha=0,
+    lwd=0.5,
+    lty=2)+
+  facet_grid(Origin~ .)+
+  theme_classic()
+
+ggsave("/data/PopGen/AllData.pi.pdf",
+    P,
+    width=12,
+    height=8)
+
+### plot Tajima's D for Inverted and Standard Chromosomes
+library(tidyverse)
+
+DATA=read.table("/data/PopGen/AllData.Tajima.D",header=T)
+
+DATA.3R=subset(DATA,DATA$C=="3R")
+DATA.3R=subset(DATA.3R,DATA.3R$Origin %in% c("Florida","Portugal","Zambia","Queensland"))
+DATA.3R$Origin <- factor(DATA.3R$Origin,levels=c("Zambia","Portugal","Florida","Queensland"))
+
+P=ggplot(DATA.3R,aes(
+    x=P,
+    y=pi,
+    col=InvStatus))+
+  geom_line(lwd=1.5)+
+  geom_rect(mapping = aes(
+        xmin=16432209,
+        xmax=24744010,
+        ymin=0,
+        ymax=(max(pi))),
+    color="black",
+    alpha=0,
+    lwd=0.5,
+    lty=2)+
+  facet_grid(Origin~ .)+
+  theme_classic()+
+  geom_hline(yintercept=0)
+
+ggsave("/data/PopGen/AllData.Tajima.D.pdf",
+    P,
+    width=12,
+    height=8)
+```
 
 ## References
 
