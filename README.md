@@ -402,15 +402,44 @@ Using VCFtools we first calculated nucleotide diveristy (π) and Tajima's _D_ as
 ## make directory 
 mkdir /data/PopGen
 
+## loop through continents/countries
 for country in Australia Zambia Europe USA 
-
 do
 
+    ## loop through karyotypes
     for karyotype in Inv Std
-
     do
 
+        ## loop through regions
+        for file in data/${country}_*_${karyotype}.samples
+        do
+            
+            ## isolate region name
+            IFS='_ ' read -r -A array <<< "$file"
+            location=${array[2]}
+
+            ## calculate π
+            /scripts/vcftools_0.1.13/bin/vcftools \
+                --keep data/${country}_${location}_${karyotype}.samples \
+                --window-pi 100000 \
+                --window-pi-step 100000 \
+                --gzvcf /data/consensus/${country}.vcf.gz \
+                --out /data/PopGen/${country}_${location}_${karyotype}_100k
+
+            ## calculate Tajima's D
+            /scripts/vcftools_0.1.13/bin/vcftools \
+                --keep data/${country}_${location}_${karyotype}.samples \
+                --TajimaD 100000 \
+                --gzvcf /data/consensus/${country}.vcf.gz \
+                --out /data/PopGen/${country}_${location}_${karyotype}_100k
+
+        
+        done
     
+    done
+
+done
+```
 
 
 ## References
