@@ -433,20 +433,22 @@ do
         done
     done
 
-## then merge the results in a single large file for π and Tajima's D and also include estimates of recombination by Comeron 
+## then merge the results in a single large file for π and Tajima's D, plot averages by karyotype and Geographic origin and test for significant differences.
 python /scripts/merge-div.py \
     --input /data/PopGen/Africa_Zambia_Inv_100k.pi,/data/PopGen/Africa_Zambia_Std_100k.pi,/data/PopGen/Africa_Zambia_All_100k.pi,/data/PopGen/Europe_Portugal_Inv_100k.pi,/data/PopGen/Europe_Portugal_Std_100k.pi,/data/PopGen/Europe_Portugal_All_100k.pi,/data/PopGen/Europe_Sweden_Std_100k.pi,/data/PopGen/America_Florida_Inv_100k.pi,/data/PopGen/America_Florida_Std_100k.pi,/data/PopGen/America_Florida_All_100k.pi,/data/PopGen/America_Maine_Std_100k.pi,/data/PopGen/Australia_Queensland_Inv_100k.pi,/data/PopGen/Australia_Queensland_Std_100k.pi,/data/PopGen/Australia_Queensland_All_100k.pi,/data/PopGen/Australia_Victoria_Std_100k.pi \
     --names Zambia-Inv,Zambia-Std,Zambia-All,Portugal-Inv,Portugal-Std,Portugal-All,Sweden-Std,Florida-Inv,Florida-Std,Florida-All,Maine-Std,Queensland-Inv,Queensland-Std,Queensland-All,Victoria-Std \
     > /data/PopGen/AllData.pi
+
+Rscript /scripts/statNplot.R /data/PopGen/AllData.pi
 
 python /scripts/merge-div.py \
     --input /data/PopGen/Africa_Zambia_Inv_100k.Tajima.D,/data/PopGen/Africa_Zambia_Std_100k.Tajima.D,/data/PopGen/Africa_Zambia_All_100k.Tajima.D,/data/PopGen/Europe_Portugal_Inv_100k.Tajima.D,/data/PopGen/Europe_Portugal_Std_100k.Tajima.D,/data/PopGen/Europe_Portugal_All_100k.Tajima.D,/data/PopGen/Europe_Sweden_Std_100k.Tajima.D,/data/PopGen/America_Florida_Inv_100k.Tajima.D,/data/PopGen/America_Florida_Std_100k.Tajima.D,/data/PopGen/America_Florida_All_100k.Tajima.D,/data/PopGen/America_Maine_Std_100k.Tajima.D,/data/PopGen/Australia_Queensland_Inv_100k.Tajima.D,/data/PopGen/Australia_Queensland_Std_100k.Tajima.D,/data/PopGen/Australia_Queensland_All_100k.Tajima.D,/data/PopGen/Australia_Victoria_Std_100k.Tajima.D \
     --names Zambia-Inv,Zambia-Std,Zambia-All,Portugal-Inv,Portugal-Std,Portugal-All,Sweden-Std,Florida-Inv,Florida-Std,Florida-All,Maine-Std,Queensland-Inv,Queensland-Std,Queensland-All,Victoria-Std \
     > /data/PopGen/AllData.Tajima.D
 
-
+Rscript /scripts/statNplot.R /data/PopGen/AllData.Tajima.D
 ```
-I then plotted the values as lineplots in R
+In addition, I plotted the values of _π_ and Tajima's _D_ as lineplots in R
 
 ```R
 ### plot π for Inverted and Standard Chromosomes
