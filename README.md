@@ -26,7 +26,7 @@ do
 done 
 ```
 
-Following the approach in [Kapun _et al._ (2014)]() bioninformatically obtain haploid genomes from hemiclones
+Following the approach in [Kapun _et al._ (2014)]() we bioinformatically obtained haploid genomes from hemiclones. This requires [PoPoolation2](https://sourceforge.net/p/popoolation2/wiki/Main/) from ([Kofler et al. 2011]())
 
 ```bash
 
@@ -395,7 +395,9 @@ Using the NEXUS files, we plotted phylogenetic networks based on the Neighbor-Ne
 
 ## 3) Population Genetics Analysis 
 
-Using VCFtools we first calculated nucleotide diveristy (π) and Tajima's _D_ as measures of genetic diversity in the different karyotypes
+### 3.1 ) Genetic variation
+
+Using [VCFtools](https://vcftools.github.io/index.html) we first calculated nucleotide diveristy (_π_) and Tajima's _D_ as measures of genetic diversity in the different karyotypes
 
 ```bash
 
@@ -514,6 +516,118 @@ ggsave("/data/PopGen/AllData.Tajima.D.pdf",
     P,
     width=12,
     height=8)
+```
+### 3.2) Genetic differentiation
+
+Again using [VCFtools](https://vcftools.github.io/index.html) we calculated pairwise FST among karyotypes in different geographic regions. Then, we merged the FST values, plotted the averages with respect to karyotype and tested for significant differences with respect to the karyotype and origin. Moreover, we tested if window-wise FST is correlated within the inverted genomic region.
+
+```bash
+## Africa
+
+### Zambia Inv vs. Std
+/scripts/vcftools_0.1.13/cpp/vcftools \
+    --gzvcf /data/consensus/Africa.vcf.gz \
+    --weir-fst-pop /data/Africa_Zambia_Inv.samples \
+    --weir-fst-pop /data/Africa_Zambia_Std.samples \
+    --fst-window-size 100000 \
+    --fst-window-step 100000 \
+    --out /data/PopGen/ZI-ZS 
+
+## Europe
+
+### Portugal Inv vs. Std
+/scripts/vcftools_0.1.13/cpp/vcftools \
+    --gzvcf /data/consensus/Europe.vcf.gz \
+    --weir-fst-pop /data/Europe_Portugal_Inv.samples \
+    --weir-fst-pop /data/Europe_Portugal_Std.samples \
+    --fst-window-size 100000 \
+    --fst-window-step 100000 \
+    --out /data/PopGen/PI-PS 
+
+### Portugal Inv vs. Sweden Std
+/scripts/vcftools_0.1.13/cpp/vcftools \
+    --gzvcf /data/consensus/Europe.vcf.gz \
+    --weir-fst-pop /data/Europe_Portugal_Inv.samples \
+    --weir-fst-pop /data/Europe_Sweden_Std.samples \
+    --fst-window-size 100000 \
+    --fst-window-step 100000 \
+    --out /data/PopGen/PI-SS 
+
+### Portugal Std vs. Sweden Std
+/scripts/vcftools_0.1.13/cpp/vcftools \
+    --gzvcf /data/consensus/Europe.vcf.gz \
+    --weir-fst-pop /data/Europe_Portugal_Std.samples \
+    --weir-fst-pop /data/Europe_Sweden_Std.samples \
+    --fst-window-size 100000 \
+    --fst-window-step 100000 \
+    --out /data/PopGen/PS-SS 
+
+## America
+
+### Florida Inv vs. Std
+/scripts/vcftools_0.1.13/cpp/vcftools \
+    --gzvcf /data/consensus/America.vcf.gz \
+    --weir-fst-pop /data/America_Florida_Inv.samples \
+    --weir-fst-pop /data/America_Florida_Std.samples \
+    --fst-window-size 100000 \
+    --fst-window-step 100000 \
+    --out /data/PopGen/FI-FS 
+
+### Florida Inv vs. Maine Std
+/scripts/vcftools_0.1.13/cpp/vcftools \
+    --gzvcf /data/consensus/America.vcf.gz \
+    --weir-fst-pop /data/America_Florida_Inv.samples \
+    --weir-fst-pop /data/America_Maine_Std.samples \
+    --fst-window-size 100000 \
+    --fst-window-step 100000 \
+    --out /data/PopGen/FI-MS 
+
+### Florida Std vs. Maine Std
+/scripts/vcftools_0.1.13/cpp/vcftools \
+    --gzvcf /data/consensus/America.vcf.gz \
+    --weir-fst-pop /data/America_Florida_Std.samples \
+    --weir-fst-pop /data/America_Maine_Std.samples \
+    --fst-window-size 100000 \
+    --fst-window-step 100000 \
+    --out /data/PopGen/FS-MS 
+
+## Australia
+
+### Queensland Inv vs. Std
+/scripts/vcftools_0.1.13/cpp/vcftools \
+    --gzvcf /data/consensus/Australia.vcf.gz \
+    --weir-fst-pop /data/Australia_Queensland_Inv.samples \
+    --weir-fst-pop /data/Australia_Queensland_Std.samples \
+    --fst-window-size 100000 \
+    --fst-window-step 100000 \
+    --out /data/PopGen/II-IS 
+
+### Queensland Inv vs. Victoria Std
+/scripts/vcftools_0.1.13/cpp/vcftools \
+    --gzvcf /data/consensus/Australia.vcf.gz \
+    --weir-fst-pop /data/Australia_Queensland_Inv.samples \
+    --weir-fst-pop /data/Australia_Victoria_Std.samples \
+    --fst-window-size 100000 \
+    --fst-window-step 100000 \
+    --out /data/PopGen/II-YS 
+
+### Queensland Std vs. Victoria Std
+/scripts/vcftools_0.1.13/cpp/vcftools \
+    --gzvcf /data/consensus/Australia.vcf.gz \
+    --weir-fst-pop /data/Australia_Queensland_Std.samples \
+    --weir-fst-pop /data/Australia_Victoria_Std.samples \
+    --fst-window-size 100000 \
+    --fst-window-step 100000 \
+    --out /data/PopGen/IS-YS 
+
+## now merge all FST values
+python2.7 /scripts/merge-diff.py \
+    --input /data/PopGen/ZI-ZS.windowed.weir.fst,/data/PopGen/PI-PS.windowed.weir.fst,/data/PopGen/PI-SS.windowed.weir.fst,/data/PopGen/PS-SS.windowed.weir.fst,/data/PopGen/FI-FS.windowed.weir.fst,/data/PopGen/FI-MS.windowed.weir.fst,/data/PopGen/FS-MS.windowed.weir.fst,/data/PopGen/II-IS.windowed.weir.fst,/data/PopGen/II-YS.windowed.weir.fst,/data/PopGen/IS-YS.windowed.weir.fst \
+    --names ZI-ZS,PI-PS,PI-SS,PS-SS,FI-FS,FI-MS,FS-MS,II-IS,II-YS,IS-YS \
+ > /data/PopGen/AllData.fst
+
+Rscript /scripts/statNcompareFST.R /data/PopGen/AllData.fst
+
 ```
 
 ## References
