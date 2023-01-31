@@ -58,12 +58,12 @@ parallel -a /data/USA/USA.sync \
         -min-coverage 10 \
         -min-count 10 \
         -max-coverage /data/USA/USA.cov \
-        -output /data/consensus/usa_min10_max005_mc10 \
-        | gzip > /data/consensus/usa_min10_max005_mc10.consensus.gz
+        -output /data/consensus/USA \
+        | gzip > /data/consensus/USA.consensus.gz
 
  ## convert consensus to VCF and retain site if > 50% of all samples with non-N's
 python2.7 /scripts/cons2vcf.py \
-    -input /data/consensus/usa_min10_max005_mc10.consensus.gz \
+    -input /data/consensus/USA.consensus.gz \
     -output /data/consensus/America \
     -ind 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58 \
     -N-cutoff 0.5 \
@@ -195,12 +195,12 @@ parallel -a /data/Portugal/Portugal.sync \
         -min-coverage 10 \
         -min-count 10 \
         -max-coverage /data/Portugal/Portugal.cov \
-        -output /data/consensus/portugal_min10_max005_mc10 \
-        | gzip > /data/consensus/portugal_min10_max005_mc10.consensus.gz
+        -output /data/consensus/Portugal \
+        | gzip > /data/consensus/Portugal.consensus.gz
 
 ## convert consensus to VCF and retain site if > 50% of all samples with non-N's
 python2.7 /scripts/cons2vcf.py \
-    -input /data/consensus/portugal_min10_max005_mc10.consensus.gz \
+    -input /data/consensus/Portugal.consensus.gz \
     -output /data/consensus/Portugal \
     -ind 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26 \
     -N-cutoff 0.5 \
@@ -267,7 +267,7 @@ gunzip -c /data/Sweden/Sweden.mpileup.gz \
 
 ## Now merge data from Portugal and Sweden
 python3 /scripts/merge_consensus.py \
-    -consensus /data/consensus/portugal_min10_max005_mc10.consensus.gz,/data/consensus/Sweden.consensus.gz \
+    -consensus /data/consensus/Portugal.consensus.gz,/data/consensus/Sweden.consensus.gz \
     | gzip > /data/consensus/Europe.cons.gz
 
 ## convert consensus to VCF and retain site if > 50% of all samples with non-N's
@@ -368,13 +368,13 @@ Now, we merge the cons files and either draw randomly selected SNPs inside _In(3
 ## Merge and select Inv SNPs
 python3 /scripts/merge_consensus.py \
     - /data/Inv.bed \
-    -consensus /data/consensus/Zambia.consensus.gz,/data/consensus/DGN.consensus.gz,/data/consensus/usa_min10_max005_mc10.consensus.gz,/data/consensus/portugal_min10_max005_mc10.consensus.gz,/data/consensus/Sweden.consensus.gz,/data/Australia/Australia.cons.gz \
+    -consensus /data/consensus/Zambia.consensus.gz,/data/consensus/DGN.consensus.gz,/data/consensus/USA.consensus.gz,/data/consensus/Portugal.consensus.gz,/data/consensus/Sweden.consensus.gz,/data/Australia/Australia.cons.gz \
     | gzip > /data/consensus/Inv.cons.gz
 
 ## Merge and select Non-Inv SNPs
 python3 /scripts/merge_consensus.py \
     - /data/NoInv.bed \
-    -consensus /data/consensus/Zambia.consensus.gz,/data/consensus/DGN.consensus.gz,/data/consensus/usa_min10_max005_mc10.consensus.gz,/data/consensus/portugal_min10_max005_mc10.consensus.gz,/data/consensus/Sweden.consensus.gz,/data/Australia/Australia.cons.gz \
+    -consensus /data/consensus/Zambia.consensus.gz,/data/consensus/DGN.consensus.gz,/data/consensus/USA.consensus.gz,/data/consensus/Portugal.consensus.gz,/data/consensus/Sweden.consensus.gz,/data/Australia/Australia.cons.gz \
     | gzip > /data/consensus/NoInv.cons.gz
 
 ## convert merged cons to nexus format
@@ -395,7 +395,7 @@ Using the NEXUS files, we plotted phylogenetic networks based on the Neighbor-Ne
 
 ## 3) Population Genetics Analysis 
 
-### 3.1 ) Genetic variation
+### 3.1) Genetic variation
 
 Using [VCFtools](https:/vcftools.github.io/index.html) we first calculated nucleotide diveristy (_π_) and Tajima's _D_ as measures of genetic diversity in the different karyotypes
 
@@ -436,7 +436,7 @@ do
     done
 
 ## then merge the results in a single large file for π and Tajima's D, plot averages by karyotype and Geographic origin and test for significant differences.
-python /scripts/merge-div.py \
+python2.7 /scripts/merge-div.py \
     -input /data/PopGen/Africa_Zambia_Inv_100k.pi,/data/PopGen/Africa_Zambia_Std_100k.pi,/data/PopGen/Africa_Zambia_All_100k.pi,/data/PopGen/Europe_Portugal_Inv_100k.pi,/data/PopGen/Europe_Portugal_Std_100k.pi,/data/PopGen/Europe_Portugal_All_100k.pi,/data/PopGen/Europe_Sweden_Std_100k.pi,/data/PopGen/America_Florida_Inv_100k.pi,/data/PopGen/America_Florida_Std_100k.pi,/data/PopGen/America_Florida_All_100k.pi,/data/PopGen/America_Maine_Std_100k.pi,/data/PopGen/Australia_Queensland_Inv_100k.pi,/data/PopGen/Australia_Queensland_Std_100k.pi,/data/PopGen/Australia_Queensland_All_100k.pi,/data/PopGen/Australia_Victoria_Std_100k.pi \
     -names Zambia-Inv,Zambia-Std,Zambia-All,Portugal-Inv,Portugal-Std,Portugal-All,Sweden-Std,Florida-Inv,Florida-Std,Florida-All,Maine-Std,Queensland-Inv,Queensland-Std,Queensland-All,Victoria-Std \
     > /data/PopGen/AllData.pi
@@ -517,6 +517,7 @@ ggsave("/data/PopGen/AllData.Tajima.D.pdf",
     width=12,
     height=8)
 ```
+
 ### 3.2) Genetic differentiation
 
 Again using [VCFtools](https:/vcftools.github.io/index.html) we calculated pairwise FST among karyotypes in different geographic regions both for single SNPs and in 100kb windows. Then, we merged the FST values, plotted the averages with respect to karyotype and tested for significant differences with respect to the karyotype and origin. Moreover, we tested if window-wise FST is correlated within the inverted genomic region.
@@ -594,7 +595,7 @@ do
 done
 ```
 
-Now test in R if there is a significant overlap among candidate SNPs and Genes across continents
+Now test in R if there is a significant overlap among candidate SNPs and Genes across continents and plot the results as barplots using the [SuperExactTest](https://cran.r-project.org/web/packages/SuperExactTest/index.html) package
 
 ```R
 ## first SNP-wise comparison
@@ -801,6 +802,68 @@ print(summary(res.AU))
 sink()
 write.table(data.frame('NAME'=summary(res.AU)[1],'GENES'=summary(res.AU)[8]),file=paste('/data/PopGen/candidates/All-genes.list',sep=''),row.names=F,quote = F,sep='\t')
 ```
+
+### 3.3) Linkage Disequilibrium
+
+Next, we assessed how linkage disequilibrium decays within the genomic region spanned by _In(3R)Payne_ in inverted and non-inverted haplotypes. 
+
+First, we calculated and plotted LD of each SNP with _In(3R)Payne_ along the 3R chromosomal arm with the Inversion.
+```bash
+
+mkdir /data/LD
+
+## Africa
+python2.7 /scripts/LD-bar.py \
+--input /data/Africa/Africa.cons.gz \
+--output /data/LD/Zambia_Bar \
+--ind ZI81,ZI508,ZI505,ZI486,ZI448,ZI446,ZI405,ZI397N,ZI384,ZI362,ZI341,ZI319,ZI293,ZI292,ZI291,ZI264,ZI237,ZI233,ZI228,ZI226,ZI221,ZI220,ZI99,ZI91,ZI86,ZI85,ZI76,ZI68,ZI61,ZI530,ZI527,ZI524,ZI517,ZI514N,ZI50N,ZI504,ZI491,ZI490,ZI488,ZI477,ZI472,ZI471,ZI468,ZI467,ZI466,ZI460,ZI458,ZI457,ZI456,ZI455N,ZI453,ZI447,ZI445,ZI444,ZI433,ZI431,ZI421,ZI418N,ZI413,ZI402,ZI398,ZI395,ZI394N,ZI392,ZI386,ZI378,ZI377,ZI374,ZI373,ZI370,ZI365,ZI364,ZI359,ZI358,ZI357N,ZI348,ZI344,ZI342,ZI339,ZI336,ZI335,ZI332,ZI33,ZI329,ZI324,ZI321,ZI320,ZI31N,ZI316,ZI314,ZI313,ZI311N,ZI303,ZI295,ZI286,ZI281,ZI28,ZI279,ZI276,ZI271,ZI27,ZI269,ZI268,ZI265,ZI263,ZI261,ZI26,ZI255,ZI254N,ZI253,ZI252,ZI251N,ZI250,ZI240,ZI239,ZI235,ZI232,ZI231,ZI225,ZI219,ZI216N,ZI213,ZI212,ZI211,ZI210,ZI207,ZI206,ZI200,ZI198,ZI196,ZI194,ZI193,ZI191,ZI185,ZI184,ZI182,ZI181,ZI179,ZI178,ZI176,ZI173,ZI172,ZI170,ZI167,ZI165,ZI164,ZI161,ZI157,ZI152,ZI138,ZI136,ZI134N,ZI129,ZI126,ZI118N,ZI117,ZI114N,ZI104,ZI10,ZI56,ZI420,ZI388 \
+--chromosome 3R \
+--N-cutoff 0.1 \
+--color blue,green,yellow,red,purple \
+--min-allele 0.1 \
+--Inv /data/Africa_Zambia_Inv.samples \
+--Std /data/Africa_Zambia_Std.samples \
+
+## Europe
+python2.7 /scripts/LD-bar.py \
+--input /data/Europe/Europe.cons.gz \
+--output /data/LD/Portugal_Bar \
+--ind F0-8-1,F0-11-1,F0-16-1,F0-21-1,F0-24-1,F0-25-1,hot-168-1,cold-21-0,cold-89-0,cold-91-0,F0-2-0,F0-3-0,F0-4-0,F0-5-0,F0-6-0,F0-7-0,F0-9-0,F0-10-0,F0-12-0,F0-13-0,F0-14-0,F0-15-0,F0-17-0,F0-18-0,F0-27-0,F0-29-0,SU02n,SU05n,SU07n,SU08,SU21n,SU25n,SU26n,SU29,SU37n,SU58n,SU75n,SU81n,SU93n,SU94 \
+--chromosome 3R \
+--N-cutoff 0.1 \
+--color blue,green,yellow,red,purple \
+--min-allele 0.1 \
+--Inv /data/Europe_Portugal_Inv.samples \
+--Std /data/Europe_Portugal_Std.samples \
+
+## America
+python2.7 /scripts/LD-bar.py \
+--input /data/USA/USA.cons.gz \
+--output /data/LD/USA_Bar \
+--ind Florida_S_1142,Florida_S_1145,Florida_S_1153,Florida_S_1155,Florida_S_1156,Florida_S_1157,Florida_S_1163,Florida_S_1164,Florida_S_1167,Florida_S_1218,Florida_S_1189,Florida_S_1170,Florida_S_1178,Florida_S_1203,Florida_S_1204,Florida_S_1158,Florida_S_1149,Florida_S_1174,Florida_S_1160,Florida_I_1153,Florida_I_1165,Florida_I_1169,Florida_I_1203,Florida_I_1218,Florida_I_1142,Florida_I_1146,Florida_I_1147,Florida_I_1149,Florida_I_1150,Florida_I_1178,Florida_I_1143,Florida_I_1156,Florida_I_1160,Florida_I_1161,Florida_I_1162,Florida_I_1164,Florida_I_1174,Florida_I_1152,Florida_I_1158,Maine_S_10-96,Maine_S_10-95,Maine_S_10-82,Maine_S_10-53,Maine_S_10-73,Maine_S_10-24,Maine_S_10-72,Maine_S_10-12,Maine_S_10-77,Maine_S_10-89,Maine_S_10-76,Maine_S_10-69,Maine_S_10-93,Maine_S_10-57,Maine_S_10-58,Maine_S_10-60,Maine_S_10-67,Maine_S_10-84,Maine_S_10-79,Maine_S_10-81 \
+--chromosome 3R \
+--N-cutoff 0.1 \
+--color blue,green,yellow,red,purple \
+--min-allele 0.1 \
+--Inv /data/America_Florida_Inv.samples \
+--Std /data/America_Florida_Std.samples \
+
+## Australia
+python2.7 /scripts/LD-bar.py \
+--input /data/Australia/Australia.cons.gz \
+--output /data/LD/Australia_Bar \
+--ind Ii1,Ii2,Ii3,Ii4,Ii5,Ii6,Ii7,Ii8,Ii9,Ii10,Ii11,Ii12,Ii13,Ii14,Ii15,Ii16,Ii17,Ii18,Ii19,Is1,Is2,Is3,Is4,Is5,Is6,Is7,Is8,Is9,Is10,Is11,Is12,Is13,Is14,Is15,Is16,Is17,Is18,YS1,YS2,YS3,YS4,YS5,YS6,YS7,YS8,YS9,YS10,YS11,YS12,YS13,YS14,YS15,YS16,YS17,YS18 \
+--chromosome 3R \
+--N-cutoff 0.1 \
+--color blue,green,yellow,red,purple \
+--min-allele 0.1 \
+--Inv /data/Australia_Queensland_Inv.samples \
+--Std /data/Australia_Queensland_Std.samples \
+
+```
+Next, we calculated LD within an among karyotypes focusing on a subset of SNPs from the population in Florida.
+
+
 
 ## References
 
