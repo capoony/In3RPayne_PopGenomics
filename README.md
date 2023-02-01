@@ -528,7 +528,7 @@ Again using [VCFtools](https:/vcftools.github.io/index.html) we calculated pairw
 continent=( "Africa" "Europe" "Europe" "Europe" "America" "America" "America" "Australia" "Australia" "Australia" )
 FST=( "ZI-ZS" "PI-PS" "PI-SS" "PS-SS" "FI-FS" "FI-MS" "FS-MS" "II-IS" "II-YS" "IS-YS" )
 Pop1=( "Africa_Zambia_Inv" "Europe_Portugal_Inv" "Europe_Portugal_Inv" "Europe_Portugal_Std" "America_Florida_Inv" "America_Florida_Inv" "America_Florida_Std" "Australia_Queensland_Inv" "Australia_Queensland_Inv" "Australia_Queensland_Std" )
-Pop1=( "Africa_Zambia_Std" "Europe_Portugal_Std" "Europe_Sweden_Std" "Europe_Sweden_Std" "America_Florida_Std" "America_Maine_Std" "America_Maine_Std" "Australia_Queensland_Std" "Australia_Victoria_Std" "Australia_Victoria_Std" )
+Pop2=( "Africa_Zambia_Std" "Europe_Portugal_Std" "Europe_Sweden_Std" "Europe_Sweden_Std" "America_Florida_Std" "America_Maine_Std" "America_Maine_Std" "Australia_Queensland_Std" "Australia_Victoria_Std" "Australia_Victoria_Std" )
 
 for index in ${!FST[@]}
 do
@@ -803,9 +803,97 @@ sink()
 write.table(data.frame('NAME'=summary(res.AU)[1],'GENES'=summary(res.AU)[8]),file=paste('/data/PopGen/candidates/All-genes.list',sep=''),row.names=F,quote = F,sep='\t')
 ```
 
-### 3.3) Linkage Disequilibrium
+### 3.3) African origin
+
+Here, we tested if inversion-specific candidate alleles in Florida are also found in the standard arrangement in flies for the ancestral African origin.
+
+```bash 
+
+mkdir /data/InvAlleles
+
+continent=( "Africa" "America" )
+region=( "Zambia" "Florida"  )
+Pop1=( "Africa_Zambia_Inv" "America_Florida_Inv" )
+Pop2=( "Africa_Zambia_Std" "America_Florida_Std" )
+FST=( "ZI-ZS" "FI-FS" )
+
+for index in ${!FST[@]}
+do
+    ## Identify inversion-specific allele in candidates from specific region
+    python3 /scripts/InvAf_from_VCF.py \
+        --input /data/consensus/${continent[index]}.vcf.gz \
+        --inv /data/${Pop1[index]}.samples \
+        --std /data/${Pop2[index]}.samples \
+        | python2.7 /scripts/OverlapSNPs.py \
+        --source /data/PopGen/${FST[index]}_cand_ann.weir.fst \
+        --target - \
+        > /data/InvAlleles/${continent[index]}.alleles
+    
+    Sample=( "Africa_Zambia_Inv" "Africa_Zambia_Std" "Europe_Portugal_Inv" "Europe_Portugal_Std" "Europe_Sweden_Std" "America_Florida_Inv" "America_Florida_Std" "America_Maine_Std" "Australia_Queensland_Inv" "Australia_Queensland_Std" "Australia_Victoria_Std" )
+
+    for index2 in ${!Sample[@]}
+    do
+        ## get allele frequency of inversion-specific allele in subset of data
+        python3 /scripts/AF_by_alleleNind.py \
+            --input /data/consensus/${continent[index]}.vcf.gz \
+            --AFl /data/InvAlleles/${continent[index]}.alleles \
+            --pops /data/${Sample[index2]}.samples \
+            > /data/InvAlleles/${continent[index]}_${Sample[index2]}.af
+
+    done
+done
+```
+Now plot with _R_ for inversion-specific alleles in North America
+
+```R
+
+FlS=read.table("/data/InvAlleles/America_America_Florida_S.af",header=F)
+FlI=read.table("/data/InvAlleles/America_America_Florida_I.af",header=F)
+MaS=read.table("/data/InvAlleles/America_America_Maine_S.af",header=F)
+ZaI=read.table("/data/InvAlleles/America_Africa_Zambia_I.af",header=F)
+ZaS=read.table("/data/InvAlleles/America_Africa_Zambia_S.af",header=F)
+PoI=read.table("/data/InvAlleles/America_Europe_Portugal_I.af",header=F)
+PoS=read.table("/data/InvAlleles/America_Europe_Portugal_S.af",header=F)
+SwS=read.table("/data/InvAlleles/America_Europe_Sweden_S.af",header=F)
+
+INTER<-Reduce(intersect,list(FlS$V2,FlI$V2,MaS$V2,ZaI$V2,ZaS$V2,PoI$V2,PoS$V2,SwS$V2))
+
+NEW=list("Florida-I"=FlI[,4][FlI$V2 %in% INTER],"Florida-S"=FlS[,4][FlS$V2 %in% INTER],"Maine-S"=MaS[,4][MaS$V2 %in% INTER],"Zambia-I"=ZaI[,4][ZaI$V2 %in% INTER],"Zambia-S"=ZaS[,4][ZaS$V2 %in% INTER],"Portugal-I"=PoI[,4][PoI$V2 %in% INTER],"Portugal-S"=PoS[,4][PoS$V2 %in% INTER],"Sweden-S"=SwS[,4][SwS$V2 %in% INTER])
+
+## plot AFs in all populations
+pdf("/data/InvAlleles/Inversion-specific-AF.pdf",width=12,height=6)
+boxplot(NEW,ylab="Allele Frequencies")
+dev.off()
+
+## add position information and write to file
+NEW=data.frame(list("POS"=FlI[,2][FlI$V2 %in% INTER],"Florida-I"=FlI[,4][FlI$V2 %in% INTER],"Florida-S"=FlS[,4][FlS$V2 %in% INTER],"Maine-S"=MaS[,4][MaS$V2 %in% INTER],"Zambia-I"=ZaI[,4][ZaI$V2 %in% INTER],"Zambia-S"=ZaS[,4][ZaS$V2 %in% INTER],"Portugal-I"=PoI[,4][PoI$V2 %in% INTER],"Portugal-S"=PoS[,4][PoS$V2 %in% INTER],"Sweden-S"=SwS[,4][SwS$V2 %in% INTER]))
+
+write.table(NEW,"/data/InvAlleles/Inversion-specific-AF.txt",quote=F,row.names=F)
+
+## insolate positions with ABS(STD-INV)>0.5 in Africa
+NEW2=NEW[abs(NEW[,5]-NEW[,6])>0.5,]
+write.table(NEW2,"/data/InvAlleles/Inversion-specific-AF0.5.txt",quote=F,row.names=F)
+
+H=hist(NEW2[,1],breaks=100,xlim=c(0,32000000))
+
+# plot genomic positions of these SNPS
+pdf("/data/InvAlleles/Inversion-specific-AF_dist.pdf",width=12,height=6)
+plot(H$mids/1000000,H$counts,type="l",xlim=c(15,27),xlab="Genomic Position (Mbp)",ylab="No. of SNPs")
+rect(16.432209,0,24.744010,max(H$counts),border="grey",lty=2)
+dev.off()
+
+## test if significant allelic difference between STD and INV in Africa
+sink("/data/InvAlleles/Inversion-specific-AF.stat")
+wilcox.test(NEW[,5],NEW[,6])
+sink()
+```
+
+
+### 3.4) Linkage Disequilibrium
 
 Here, we assessed how linkage disequilibrium decays within the genomic region spanned by _In(3R)Payne_ in inverted and non-inverted haplotypes. 
+
+#### 3.4.1) SNP-wise LD with the inversion
 
 First, we calculated and plotted LD of each SNP with _In(3R)Payne_ along the 3R chromosomal arm with the Inversion.
 ```bash
@@ -813,7 +901,7 @@ First, we calculated and plotted LD of each SNP with _In(3R)Payne_ along the 3R 
 mkdir /data/LD
 
 ## Africa
-python2.7 /scripts/LD-bar.py \
+python2.7 /scripts/LD_bar.py \
 --input /data/Africa/Africa.cons.gz \
 --output /data/LD/Zambia_Bar \
 --ind ZI81,ZI508,ZI505,ZI486,ZI448,ZI446,ZI405,ZI397N,ZI384,ZI362,ZI341,ZI319,ZI293,ZI292,ZI291,ZI264,ZI237,ZI233,ZI228,ZI226,ZI221,ZI220,ZI99,ZI91,ZI86,ZI85,ZI76,ZI68,ZI61,ZI530,ZI527,ZI524,ZI517,ZI514N,ZI50N,ZI504,ZI491,ZI490,ZI488,ZI477,ZI472,ZI471,ZI468,ZI467,ZI466,ZI460,ZI458,ZI457,ZI456,ZI455N,ZI453,ZI447,ZI445,ZI444,ZI433,ZI431,ZI421,ZI418N,ZI413,ZI402,ZI398,ZI395,ZI394N,ZI392,ZI386,ZI378,ZI377,ZI374,ZI373,ZI370,ZI365,ZI364,ZI359,ZI358,ZI357N,ZI348,ZI344,ZI342,ZI339,ZI336,ZI335,ZI332,ZI33,ZI329,ZI324,ZI321,ZI320,ZI31N,ZI316,ZI314,ZI313,ZI311N,ZI303,ZI295,ZI286,ZI281,ZI28,ZI279,ZI276,ZI271,ZI27,ZI269,ZI268,ZI265,ZI263,ZI261,ZI26,ZI255,ZI254N,ZI253,ZI252,ZI251N,ZI250,ZI240,ZI239,ZI235,ZI232,ZI231,ZI225,ZI219,ZI216N,ZI213,ZI212,ZI211,ZI210,ZI207,ZI206,ZI200,ZI198,ZI196,ZI194,ZI193,ZI191,ZI185,ZI184,ZI182,ZI181,ZI179,ZI178,ZI176,ZI173,ZI172,ZI170,ZI167,ZI165,ZI164,ZI161,ZI157,ZI152,ZI138,ZI136,ZI134N,ZI129,ZI126,ZI118N,ZI117,ZI114N,ZI104,ZI10,ZI56,ZI420,ZI388 \
@@ -825,7 +913,7 @@ python2.7 /scripts/LD-bar.py \
 --Std /data/Africa_Zambia_Std.samples \
 
 ## Europe
-python2.7 /scripts/LD-bar.py \
+python2.7 /scripts/LD_bar.py \
 --input /data/Europe/Europe.cons.gz \
 --output /data/LD/Portugal_Bar \
 --ind F0-8-1,F0-11-1,F0-16-1,F0-21-1,F0-24-1,F0-25-1,hot-168-1,cold-21-0,cold-89-0,cold-91-0,F0-2-0,F0-3-0,F0-4-0,F0-5-0,F0-6-0,F0-7-0,F0-9-0,F0-10-0,F0-12-0,F0-13-0,F0-14-0,F0-15-0,F0-17-0,F0-18-0,F0-27-0,F0-29-0,SU02n,SU05n,SU07n,SU08,SU21n,SU25n,SU26n,SU29,SU37n,SU58n,SU75n,SU81n,SU93n,SU94 \
@@ -837,7 +925,7 @@ python2.7 /scripts/LD-bar.py \
 --Std /data/Europe_Portugal_Std.samples \
 
 ## America
-python2.7 /scripts/LD-bar.py \
+python2.7 /scripts/LD_bar.py \
 --input /data/USA/USA.cons.gz \
 --output /data/LD/USA_Bar \
 --ind Florida_S_1142,Florida_S_1145,Florida_S_1153,Florida_S_1155,Florida_S_1156,Florida_S_1157,Florida_S_1163,Florida_S_1164,Florida_S_1167,Florida_S_1218,Florida_S_1189,Florida_S_1170,Florida_S_1178,Florida_S_1203,Florida_S_1204,Florida_S_1158,Florida_S_1149,Florida_S_1174,Florida_S_1160,Florida_I_1153,Florida_I_1165,Florida_I_1169,Florida_I_1203,Florida_I_1218,Florida_I_1142,Florida_I_1146,Florida_I_1147,Florida_I_1149,Florida_I_1150,Florida_I_1178,Florida_I_1143,Florida_I_1156,Florida_I_1160,Florida_I_1161,Florida_I_1162,Florida_I_1164,Florida_I_1174,Florida_I_1152,Florida_I_1158,Maine_S_10-96,Maine_S_10-95,Maine_S_10-82,Maine_S_10-53,Maine_S_10-73,Maine_S_10-24,Maine_S_10-72,Maine_S_10-12,Maine_S_10-77,Maine_S_10-89,Maine_S_10-76,Maine_S_10-69,Maine_S_10-93,Maine_S_10-57,Maine_S_10-58,Maine_S_10-60,Maine_S_10-67,Maine_S_10-84,Maine_S_10-79,Maine_S_10-81 \
@@ -849,7 +937,7 @@ python2.7 /scripts/LD-bar.py \
 --Std /data/America_Florida_Std.samples \
 
 ## Australia
-python2.7 /scripts/LD-bar.py \
+python2.7 /scripts/LD_bar.py \
 --input /data/Australia/Australia.cons.gz \
 --output /data/LD/Australia_Bar \
 --ind Ii1,Ii2,Ii3,Ii4,Ii5,Ii6,Ii7,Ii8,Ii9,Ii10,Ii11,Ii12,Ii13,Ii14,Ii15,Ii16,Ii17,Ii18,Ii19,Is1,Is2,Is3,Is4,Is5,Is6,Is7,Is8,Is9,Is10,Is11,Is12,Is13,Is14,Is15,Is16,Is17,Is18,YS1,YS2,YS3,YS4,YS5,YS6,YS7,YS8,YS9,YS10,YS11,YS12,YS13,YS14,YS15,YS16,YS17,YS18 \
@@ -861,7 +949,93 @@ python2.7 /scripts/LD-bar.py \
 --Std /data/Australia_Queensland_Std.samples \
 
 ```
-Next, we calculated LD within an among karyotypes focusing on a subset of SNPs from the population in Florida.
+
+#### 3.4.2) LD heatmaps
+
+Next, we calculated LD heatmaps within an among karyotypes focusing on a subset of 5000 SNPs from populations with mixed karyotypes in different continents. The numbers of the parameter `ind` correspond to the (zero-based) position of the chosen individuals (from \*.samples files) in the consensus block. See [Kapun _et al._ 2014]() for more details. Below, we are showing the code for the LD analysis within karyotypes, the `ind` parameter needs to be adjusted (based on the \*.sample files in data/) when repeating the analyses for LD within karyotypes.
+
+```bash
+
+## Zambia - full
+python3 /scripts/LD_heatmap.py \
+    --input /data/Africa/Africa.cons.gz \
+    --output /data/LD/Zambia \
+    --subsample 5000 \
+    --ind 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,20,21,31,32,33,51,54,72,74,76,90,94,105,114,116,119,120,126,135,137,146,151,158 \
+    --chromosome 3R \
+    --N-cutoff 0.1 \
+    --color purple,red,yellow,green,blue \
+    --min-allele 0.3
+
+## Portugal - full 
+python3 /scripts/LD_heatmap.py \
+    --input /data/Europe/Europe.cons.gz \
+    --output /data/LD/Portugal \
+    --subsample 5000 \
+    --ind 0,1,2,3,4,5,6,10,11,13,17,22,23,25 \
+    --chromosome 3R \
+    --N-cutoff 0.1 \
+    --color purple,red,yellow,green,blue \
+    --min-allele 0.3
+
+## Florida - full 
+python3 /scripts/LD_heatmap.py \
+    --input /data/USA/USA.cons.gz \
+    --output /data/LD/Florida \
+    --subsample 5000 \
+    --ind 0,1,2,3,4,5,6,7,8,9,10,11,13,14,15,17,18,19,21,22,23,24,25,26,27,29,30,31,32,33,34,35,36,37,38 \
+    --chromosome 3R \
+    --N-cutoff 0.1 \
+    --color purple,red,yellow,green,blue \
+    --min-allele 0.3
+
+## Australia - full 
+python3 /scripts/LD_heatmap.py \
+    --input /data/Australia/Australia.cons.gz \
+    --output /data/LD/Queensland \
+    --subsample 5000 \
+    --ind 0,1,3,6,9,10,11,15,16,17,25,32,35,36,12,13,14,19,21,24,26,27,29,31,33 \
+    --chromosome 3R \
+    --N-cutoff 0.1 \
+    --color purple,red,yellow,green,blue \
+    --min-allele 0.3
+```
+
+#### 3.4.3) Decay of LD
+
+Next, we estimated differences in the decay of LD with respect to different karyotypes based on the `*.dist.gz` output files from the analyses above and tested for significant differences with non-linear mixed models.
+
+```bash
+
+## loop through samples
+continent=( "Africa" "Europe" "America" "Australia" )
+region=( "Zambia" "Portugal" "Florida" "Queensland" )
+Pop1=( "Africa_Zambia_Inv" "Europe_Portugal_Inv"  "America_Florida_Inv"  "Australia_Queensland_Inv"  )
+Pop2=( "Africa_Zambia_Std" "Europe_Portugal_Std" "America_Florida_Std" "Australia_Queensland_Std" )
+
+for index in ${!Pop1[@]}
+do  
+
+    ## plot the decay
+    python2.7 /scripts/LD_decay.py \
+        --vcf /data/consensus/${continent[index]}.vcf.gz \
+        --samples /data/${Pop1[index]}.samples,/data/${Pop2[index]}.samples \
+        --names I,S \
+        --combsample 50000 \
+        --SNPs 5000 \
+        --maxdist 100000 \
+        --threshold 0.1 \
+        --N-threshold 0.5 \
+        --region 3R:16432209-24744010 \
+        --out /data/LD/${region[index]}_decay
+
+    ## test for significant differences
+    Rscript /scripts/NLS.R /data/LD/${region[index]}_decay
+
+done
+```
+
+### 4) Transcriptomic analysis
 
 
 
