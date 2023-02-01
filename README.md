@@ -1814,8 +1814,16 @@ done
 
 ## References
 
-Kapun, M., Schalkwyk, H. van, McAllister, B., Flatt, T. & Schlötterer, C. 2014. Inference of chromosomal inversion dynamics from Pool-Seq data in natural and laboratory populations of Drosophila melanogaster. Molecular Ecology 23: 1813–1827.
+Kapopoulou, A., Kapun, M., Pieper, B., Pavlidis, P., Wilches, R., Duchen, P., et al. 2020. Demographic analyses of a new sample of haploid genomes from a Swedish population of _Drosophila melanogaster_. Sci Rep 10: 22415. Nature Publishing Group.
 
-Kapun, M., Barrón, M.G., Staubach, F., Obbard, D.J., Wiberg, R.A.W., Vieira, J., et al. 2020. Genomic Analysis of European Drosophila melanogaster Populations Reveals Longitudinal Structure, Continent-Wide Selection, and Previously Unknown DNA Viruses. Mol Biol Evol 37: 2661–2678. Oxford Academic.
+Kapun, M., Schalkwyk, H. van, McAllister, B., Flatt, T. & Schlötterer, C. 2014. Inference of chromosomal inversion dynamics from Pool-Seq data in natural and laboratory populations of _Drosophila melanogaster_. Molecular Ecology 23: 1813–1827.
+
+Kapun, M., Barrón, M.G., Staubach, F., Obbard, D.J., Wiberg, R.A.W., Vieira, J., et al. 2020. Genomic Analysis of European _Drosophila melanogaster_ Populations Reveals Longitudinal Structure, Continent-Wide Selection, and Previously Unknown DNA Viruses. Mol Biol Evol 37: 2661–2678. Oxford Academic.
+
+Kapun, M., Mitchell, E.D., Kawecki, T.J., Schmidt, P. & Flatt, T. 2023. An Ancestral Balanced Inversion Polymorphism Confers Global Adaptation. bioRxiv.
 
 Kofler, R., Pandey, R.V. & Schlotterer, C. 2011. PoPoolation2: identifying differentiation between populations using sequencing of pooled DNA samples (Pool-Seq). Bioinformatics 27: 3435–3436.
+
+Lack, J.B., Lange, J.D., Tang, A.D., B, C.-D., Russell & Pool, J.E. 2016. A Thousand Fly Genomes: An Expanded _Drosophila_ Genome Nexus. Mol Biol Evol 33: msw195-3313.
+
+Rane, R.V., Rako, L., Kapun, M., Lee, S.F. & Hoffmann, A.A. 2015. Genomic evidence for role of inversion 3RP of _Drosophila melanogaster_ in facilitating climate change adaptation. Molecular Ecology 24: 2423–2432.
