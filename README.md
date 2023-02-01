@@ -9,6 +9,8 @@ see Material and Methods in [Kapun _et al._ (2023)](https://www.biorxiv.org/cont
 For each of the newly sequenced library in the USA, test the quality with FASTQC, trim the raw reads with cutadapt, map the reads with bbmap, sort and deduplicate the BAM file with picard and realign around InDels with GATK
 
 ```bash
+mkdir /data/mapping
+
 ## loop through raw reads in folder /data and store BAM in /data/mapping
 for file in /data/USA/*_R1.fq.gz
 do
@@ -29,13 +31,15 @@ done
 Following the approach in [Kapun _et al._ (2014)](https://onlinelibrary.wiley.com/doi/full/10.1111/mec.12594) we bioinformatically obtained haploid genomes from hemiclones. This requires [PoPoolation2](https:/sourceforge.net/p/popoolation2/wiki/Main/) from ([Kofler et al. 2011](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3232374/))
 
 ```bash
+mkdir /data/USA
+mkdir /data/consensus
 
 ## synchronize as MPILEUP based on hologenome from Kapun et al. (2020) only including 3L and 3R
 samtools mpileup \
     -B \
-    -f reference/Dmel_6.04_hologenome_v2.fasta \
+    -f /data/Dmel_6.04_hologenome_v2.fasta \
     -b /data/USA_BAM.txt \
-    -l data /regions.bed.txt > /data/USA/USA.mpileup
+    -l /data/regions.bed.txt > /data/USA/USA.mpileup
 
 ## use PoPoolation2 (Kofler et al. 2011) to covert MPILEUP to SYNC format
 java -jar /scripts/popoolation2_1201/mpileup2sync.jar \
@@ -73,6 +77,9 @@ python3 /scripts/v3/cons2vcf.py \
 ### 1.2) Worldwide samples from DGN dataset (see Lack, _et al._ [2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5100052/))
 
 ```bash
+
+mkdir /data/DGNs
+
 ## download raw data from SRA and map with same pipeline as above
 while IFS=',' read -r name SRA
 do 
@@ -85,7 +92,7 @@ done < /data/DGN_SRA.txt
 ## now merge all strains to a big mpileup
 samtools mpileup \
     -B \
-    -f /reference/Dmel_6.04_hologenome_v2.fasta \
+    -f /data/Dmel_6.04_hologenome_v2.fasta \
     -b /data/DGN_BAM.txt 
     -l /data/regions.bed \
     | gzip > /data/DGN/DGN.mpileup.gz
@@ -106,6 +113,9 @@ gunzip -c /data/DGN/DGN.mpileup.gz \
 ### 1.3) Zambia from DGN dataset (see Lack, _et al._ [2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5100052/))
 
 ```bash
+
+mkdir /data/Zambia
+
 ## download raw data from SRA and map with same pipeline as above
 while IFS=',' read -r name SRA
 do 
@@ -118,7 +128,7 @@ done < /data/Zambia_SRA.txt
 ## now merge all Zambian strains to a big mpileup
 samtools mpileup \
     -B \
-    -f /reference/Dmel_6.04_hologenome_v2.fasta \
+    -f /data/Dmel_6.04_hologenome_v2.fasta \
     -b /data/Zambia_BAM.txt 
     -l /data/regions.bed \
     | gzip > /data/Zambia/Zambia.mpileup.gz
@@ -147,6 +157,8 @@ python3 /scripts/v3/cons2vcf.py \
 
 ```bash
 
+mkdir /data/Portugal
+
 ## get and map data from Franssen et al. 2014
 while IFS=',' read -r name FWD REV
 do 
@@ -169,7 +181,7 @@ done < /data/Portugal_SRA2.txt
 ## now merge all Portugese strains to a big mpileup
 samtools mpileup \
     -B \
-    -f /reference/Dmel_6.04_hologenome_v2.fasta \
+    -f /data/Dmel_6.04_hologenome_v2.fasta \
     -b /data/Portugal_BAM.txt 
     -l /data/regions.bed \
     | gzip > /data/Portugal/Portugal.mpileup.gz
@@ -213,6 +225,8 @@ Use [Aspera](https:/www.ibm.com/aspera/connect/) and [sratoolkit](https:/www.ncb
 
 ```bash
 
+mkdir /data/Sweden
+
 ## get and map data 
 while IFS=$' \t\n'
 read -r A B C D E F SRA H name remainder
@@ -249,7 +263,7 @@ done < /data/Sweden/Sweden_SRA.txt
 ## now merge all Portugese strains to a big mpileup
 samtools mpileup \
     -B \
-    -f /reference/Dmel_6.04_hologenome_v2.fasta \
+    -f /data/Dmel_6.04_hologenome_v2.fasta \
     -b /data/Sweden_BAM.txt 
     -l /data/regions.bed \
     | gzip > /data/Sweden/Sweden.mpileup.gz
@@ -285,6 +299,8 @@ We downloaded the raw sequencing data of [Rane _et al._ 2015](https://onlinelibr
 
 ```bash
 
+mkdir /data/Australia
+
 ## loop through raw reads in folder /data and store BAM in /data/mapping
 for file in /data/Australia/*_R1.fq.gz
 do
@@ -304,9 +320,9 @@ done
 ## synchronize as MPILEUP based on hologenome from Kapun et al. (2020) only including 3L and 3R
 samtools mpileup \
     -B \
-    -f reference/Dmel_6.04_hologenome_v2.fasta \
+    -f /data/Dmel_6.04_hologenome_v2.fasta \
     -b /data/Australia_BAM.txt \
-    -l data /regions.bed.txt > /data/Australia/Australia.mpileup
+    -l /data/regions.bed.txt > /data/Australia/Australia.mpileup
 
 ## use PoPoolation2 (Kofler et al. 2011) to covert MPILEUP to SYNC format
 java -jar /scripts/popoolation2_1201/mpileup2sync.jar \
