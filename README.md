@@ -805,7 +805,7 @@ write.table(data.frame('NAME'=summary(res.AU)[1],'GENES'=summary(res.AU)[8]),fil
 
 ### 3.3) Linkage Disequilibrium
 
-Next, we assessed how linkage disequilibrium decays within the genomic region spanned by _In(3R)Payne_ in inverted and non-inverted haplotypes. 
+Here, we assessed how linkage disequilibrium decays within the genomic region spanned by _In(3R)Payne_ in inverted and non-inverted haplotypes. 
 
 First, we calculated and plotted LD of each SNP with _In(3R)Payne_ along the 3R chromosomal arm with the Inversion.
 ```bash
