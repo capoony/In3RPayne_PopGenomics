@@ -1058,7 +1058,7 @@ done
 ```bash
 ## loop through all libraries and trim
 
-mkdir /data/RNASeq/trimmed
+mkdir -p /data/RNASeq/trimmed
 for i in /data/RNASeq/*.fq.gz
 do
 
