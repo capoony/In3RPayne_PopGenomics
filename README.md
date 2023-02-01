@@ -1037,6 +1037,60 @@ done
 
 ### 4) Transcriptomic analysis
 
+#### 4.1) Trim and map RNASeq data 
+
+```bash
+## loop through all libraries and trim
+
+mkdir /data/RNASeq/trimmed
+for i in /data/RNASeq/*.fq.gz
+do
+
+    ## use only a subset of the variable i as the name
+    name=${i##*/}
+    n="$( cut -d '.' -f 1 <<< "$name" )"
+
+    ## trim with cutadapt
+    /scripts/cutadapt \
+    -q 18 \
+    --minimum-length 75 \
+    -o /data/RNASeq/trimmed/$n.fq.gz \
+    $i 
+
+done
+```
+Get reference transcriptome
+
+```bash
+cd /data/RNASeq/
+curl -O ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.17_FB2017_04/fasta/dmel-all-CDS-r6.17.fasta.gz
+```
+
+Map with [Kallisto]()
+
+```bash
+## index the transcriptome
+/scripts/kallisto index \
+    -i /data/RNASeq/dmel-all-CDS-r6.17.idx \
+    /data/RNASeq/dmel-all-CDS-r6.17.fasta.gz
+
+mkdir /data/RNASeq/kallisto
+
+## loop through all libraries and map with kallisto
+for i in /data/RNASeq/*.fq.gz
+do
+
+    name=${i##*/}
+    n="$( cut -d '.' -f 1 <<< "$name" )"
+
+    kallisto quant \
+    -i /data/RNASeq/dmel-all-CDS-r6.17.idx \
+    -o /data/RNASeq/kallisto/$n \
+    --single -l 101 -s 10 -b 100 --rf-stranded -t 24 \
+    /data/RNASeq/trimmed/$name \
+
+done
+```
 
 
 ## References
