@@ -223,28 +223,3 @@ java -Xmx20g -jar scripts/GenomeAnalysisTK-3.4-46/GenomeAnalysisTK.jar \
     -o $out/mapping/$name-dedup_rg_InDel.bam
 
 rm $out/mapping/$name-dedup_rg.bam
-
-## ---------- >  4) test for simulans contamination
-#
-#mkdir $out/sim_cont
-#
-#samtools mpileup \
-#-B \
-#-f reference/Dmel_6.04_hologenome_v2.fasta \
-#$out/mapping/$name-dedup_rg_InDel.bam | \
-#python scripts/python/contamination_in_pileup.py - \
-#reference/sim_mel-new.div \
-#> $out/sim_cont/$name-hist.txt
-#
-### plot sim-specific allele frequencies as histograms
-#echo """
-#AFL=read.table('$out/sim_cont/$name-hist.txt',header=F)
-#pdf('$out/sim_cont/$name-hist.pdf')
-#SimAlleles=AFL[,3]
-#hist(SimAlleles,breaks=100)
-#abline(v=mean(SimAlleles),col='red')
-#legend('topright',legend=paste('mean Freq:',mean(SimAlleles),sep=' '))
-#dev.off()
-#""" > $out/sim_cont/$name-hist.r
-#
-#Rscript $out/sim_cont/$name-hist.r
